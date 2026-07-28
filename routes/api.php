@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\Reference\LgaController;
 use App\Http\Controllers\Api\Reference\WardController;
 use App\Http\Controllers\Api\Election\ElectionController;
+use App\Http\Controllers\Api\Nomination\NominationController;
 
 // Public Routes
 Route::post('/login', [AuthController::class, 'login']);
@@ -29,3 +30,4 @@ Route::post('/elections', [ElectionController::class, 'store']);
 Route::get('/elections', [ElectionController::class, 'index']);
 
 Route::get('/elections/{election}', [ElectionController::class, 'show']);
+Route::post('/nominations', [NominationController::class, 'store']);
