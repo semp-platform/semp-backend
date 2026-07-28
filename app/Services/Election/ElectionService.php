@@ -49,4 +49,27 @@ class ElectionService
             ]);
         });
     }
+
+    public function getAll()
+{
+    return Election::query()
+        ->with([
+            'electionType',
+            'state',
+            'electionPositions.position',
+        ])
+        ->orderByDesc('election_date')
+        ->get();
+}
+
+public function getById(int $id): Election
+{
+    return Election::query()
+        ->with([
+            'electionType',
+            'state',
+            'electionPositions.position',
+        ])
+        ->findOrFail($id);
+}
 }

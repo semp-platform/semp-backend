@@ -26,3 +26,6 @@ Route::get('/states/{state}/lgas', [LgaController::class, 'byState']);
 Route::get('/lgas/{lga}/wards', [WardController::class, 'byLga']);
 
 Route::post('/elections', [ElectionController::class, 'store']);
+Route::get('/elections', [ElectionController::class, 'index']);
+
+Route::get('/elections/{election}', [ElectionController::class, 'show']);
