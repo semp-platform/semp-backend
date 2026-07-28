@@ -1,20 +1,20 @@
 <?php
 
-namespace App\Models\Reference;
+namespace App\Models\Election;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Reference\Lga;
-class State extends Model
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+
+class Position extends Model
 {
-public function lgas()
-{
-    return $this->hasMany(Lga::class);
-}
+    use HasUuids;
+
+    protected $table = 'positions';
+
     protected $fillable = [
         'name',
         'code',
-        'capital',
-        'geopolitical_zone',
+        'display_order',
         'is_active',
     ];
 

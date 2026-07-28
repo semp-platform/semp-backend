@@ -3,17 +3,12 @@
 namespace App\Services\Reference;
 
 use App\Models\Reference\State;
+use App\Services\BaseService;
 
-class StateService
+class StateService extends BaseService
 {
-    /**
-     * Get all active states.
-     */
-    public function getAll()
+    public function __construct(State $model)
     {
-        return State::query()
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get();
+        parent::__construct($model);
     }
 }

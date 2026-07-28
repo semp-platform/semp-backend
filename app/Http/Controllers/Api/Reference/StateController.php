@@ -2,24 +2,26 @@
 
 namespace App\Http\Controllers\Api\Reference;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\BaseApiController;
 use App\Http\Resources\StateResource;
 use App\Services\Reference\StateService;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
-class StateController extends Controller
+class StateController extends BaseApiController
 {
     public function __construct(
-        private readonly StateService $stateService
+        protected StateService $service
     ) {}
 
     /**
-     * Display a listing of active states.
+     * Display a listing of states.
      */
-    public function index(): AnonymousResourceCollection
+    public function index()
     {
-        return StateResource::collection(
-            $this->stateService->getAll()
+        return $this->successResponse(
+            StateResource::collection(
+                $this->service->all()
+            ),
+            'States retrieved successfully.'
         );
     }
 }

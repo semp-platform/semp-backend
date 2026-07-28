@@ -3,22 +3,22 @@
 namespace App\Models\Reference;
 
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Reference\Lga;
-class State extends Model
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class Lga extends Model
 {
-public function lgas()
-{
-    return $this->hasMany(Lga::class);
-}
     protected $fillable = [
+        'state_id',
         'name',
-        'code',
-        'capital',
-        'geopolitical_zone',
         'is_active',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
+    public function state(): BelongsTo
+    {
+        return $this->belongsTo(State::class);
+    }
 }

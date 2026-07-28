@@ -1,9 +1,10 @@
 <?php
 
-namespace Database\Seeders;
+namespace Database\Seeders\Reference;
+
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\Reference\State;
 
 class StateSeeder extends Seeder
 {
@@ -54,6 +55,24 @@ class StateSeeder extends Seeder
 
         ];
 
-        DB::table('states')->insert($states);
+       foreach ($states as $state) {
+
+    State::updateOrCreate(
+
+        [
+            'code' => $state['code'],
+        ],
+
+        [
+            'name' => $state['name'],
+            'capital' => $state['capital'],
+            'geopolitical_zone' => $state['geopolitical_zone'],
+            'is_active' => true,
+        ]
+
+    );
+
+}
     }
 }
+
