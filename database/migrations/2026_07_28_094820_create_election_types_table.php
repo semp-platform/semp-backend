@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('election_types', function (Blueprint $table) {
 
-            $table->uuid('id')->primary();
+            $table->id();
 
             $table->string('name', 100)->unique();
 

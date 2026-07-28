@@ -3,12 +3,11 @@
 namespace App\Models\Election;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 
 class Position extends Model
 {
-    use HasUuids;
-
     protected $table = 'positions';
 
     protected $fillable = [
@@ -21,4 +20,13 @@ class Position extends Model
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
+    public function electionPositions(): HasMany
+{
+    return $this->hasMany(ElectionPosition::class);
 }
+
+
+}
+
+

@@ -1,35 +1,40 @@
 <?php
 
-namespace App\Models\Reference;
+namespace App\Models\Election;
 
+use App\Models\Reference\State;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Lga extends Model
+class Election extends Model
 {
     protected $fillable = [
+        'election_type_id',
         'state_id',
         'name',
+        'election_date',
+        'status',
         'is_active',
     ];
 
     protected $casts = [
+        'election_date' => 'date',
         'is_active' => 'boolean',
     ];
+
+    public function electionType(): BelongsTo
+    {
+        return $this->belongsTo(ElectionType::class);
+    }
 
     public function state(): BelongsTo
     {
         return $this->belongsTo(State::class);
     }
-
-    public function wards(): HasMany
+    public function electionPositions(): HasMany
 {
-    return $this->hasMany(Ward::class);
+    return $this->hasMany(ElectionPosition::class);
 }
 
-public function lcdas(): HasMany
-{
-    return $this->hasMany(Lcda::class);
-}
 }
