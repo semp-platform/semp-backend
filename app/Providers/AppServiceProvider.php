@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Contracts\Identity\IdentityVerificationService;
+use App\Services\Identity\MockIdentityVerificationService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -11,7 +13,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(
+    IdentityVerificationService::class,
+    MockIdentityVerificationService::class
+);
     }
 
     /**
