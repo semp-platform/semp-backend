@@ -4,12 +4,11 @@ namespace App\Models\Reference;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Lga extends Model
+class Ward extends Model
 {
     protected $fillable = [
-        'state_id',
+        'lga_id',
         'name',
         'is_active',
     ];
@@ -18,13 +17,8 @@ class Lga extends Model
         'is_active' => 'boolean',
     ];
 
-    public function state(): BelongsTo
+    public function lga(): BelongsTo
     {
-        return $this->belongsTo(State::class);
+        return $this->belongsTo(Lga::class);
     }
-
-    public function wards(): HasMany
-{
-    return $this->hasMany(Ward::class);
-}
 }
