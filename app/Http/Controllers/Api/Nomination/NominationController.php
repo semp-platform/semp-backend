@@ -25,4 +25,24 @@ class NominationController extends BaseApiController
             201
         );
     }
+    public function index()
+{
+    return $this->successResponse(
+        NominationResource::collection(
+            $this->service->getAll()
+        ),
+        'Nominations retrieved successfully.'
+    );
+}
+
+public function show(int $nomination)
+{
+    return $this->successResponse(
+        new NominationResource(
+            $this->service->getById($nomination)
+        ),
+        'Nomination retrieved successfully.'
+    );
+}
+
 }

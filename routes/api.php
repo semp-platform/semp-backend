@@ -31,3 +31,6 @@ Route::get('/elections', [ElectionController::class, 'index']);
 
 Route::get('/elections/{election}', [ElectionController::class, 'show']);
 Route::post('/nominations', [NominationController::class, 'store']);
+Route::get('/nominations', [NominationController::class, 'index']);
+
+Route::get('/nominations/{nomination}', [NominationController::class, 'show']);

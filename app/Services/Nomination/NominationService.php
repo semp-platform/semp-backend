@@ -133,4 +133,32 @@ class NominationService
             ]);
         });
     }
+    public function getAll()
+{
+    return Nomination::query()
+        ->with([
+            'election',
+            'politicalParty',
+            'candidate',
+            'position',
+            'lga',
+            'ward',
+        ])
+        ->latest()
+        ->get();
+}
+
+public function getById(int $id): Nomination
+{
+    return Nomination::query()
+        ->with([
+            'election',
+            'politicalParty',
+            'candidate',
+            'position',
+            'lga',
+            'ward',
+        ])
+        ->findOrFail($id);
+}
 }
