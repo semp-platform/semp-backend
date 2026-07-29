@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\Reference\WardController;
 use App\Http\Controllers\Api\Election\ElectionController;
 use App\Http\Controllers\Api\Nomination\NominationController;
 
+
 // Public Routes
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/states', [StateController::class, 'index']);
@@ -34,3 +35,14 @@ Route::post('/nominations', [NominationController::class, 'store']);
 Route::get('/nominations', [NominationController::class, 'index']);
 
 Route::get('/nominations/{nomination}', [NominationController::class, 'show']);
+
+
+Route::middleware('auth')->group(function () {
+    Route::get('/', function () {
+        return redirect()->route('dashboard');
+    });
+
+
+
+
+});
