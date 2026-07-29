@@ -27,22 +27,22 @@ class ElectionController extends BaseApiController
     }
 
     public function index()
-{
-    return $this->successResponse(
-        ElectionResource::collection(
-            $this->service->getAll()
-        ),
-        'Elections retrieved successfully.'
-    );
-}
+    {
+        return $this->successResponse(
+            ElectionResource::collection(
+                $this->service->getAll()
+            ),
+            'Elections retrieved successfully.'
+        );
+    }
 
-public function show(int $election)
-{
-    return $this->successResponse(
-        new ElectionResource(
-            $this->service->getById($election)
-        ),
-        'Election retrieved successfully.'
-    );
-}
+    public function show(int $election)
+    {
+        return $this->successResponse(
+            new ElectionResource(
+                $this->service->getById($election)
+            ),
+            'Election retrieved successfully.'
+        );
+    }
 }
