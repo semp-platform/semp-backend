@@ -7,6 +7,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use App\Models\Party\PoliticalParty;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Models\Candidate\CandidateDocument;
 
 class User extends Authenticatable
 {
@@ -39,4 +42,30 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function politicalParties(): BelongsToMany
+{
+    return $this->belongsToMany(
+        PoliticalParty::class,
+        'political_party_users'
+    )
+        ->withPivot('is_active')
+        ->withTimestamps();
+}
+public function uploadedCandidateDocuments()
+{
+    return $this->hasMany(
+        CandidateDocument::class,
+        'uploaded_by'
+    );
+}
+
+public function verifiedCandidateDocuments()
+{
+    return $this->hasMany(
+        CandidateDocument::class,
+        'verified_by'
+    );
+}
+
 }

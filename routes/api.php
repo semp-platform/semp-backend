@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\Reference\LgaController;
 use App\Http\Controllers\Api\Reference\WardController;
 use App\Http\Controllers\Api\Election\ElectionController;
 use App\Http\Controllers\Api\Nomination\NominationController;
+use App\Http\Controllers\Api\Reference\LcdaController;
 
 
 // Public Routes
@@ -26,6 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::get('/lgas', [LgaController::class, 'index']);
 Route::get('/states/{state}/lgas', [LgaController::class, 'byState']);
 Route::get('/lgas/{lga}/wards', [WardController::class, 'byLga']);
+Route::get( 'lgas/{lga}/lcdas', [LcdaController::class, 'byLga']);
 
 Route::post('/elections', [ElectionController::class, 'store']);
 Route::get('/elections', [ElectionController::class, 'index']);

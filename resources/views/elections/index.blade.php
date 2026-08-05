@@ -17,6 +17,12 @@
             View and manage election events configured on SEMP.
         </p>
     </div>
+    <a
+    href="{{ route('elections.create') }}"
+    class="shrink-0 rounded-lg bg-emerald-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-900"
+>
+    Create Election
+</a>
 
 </div>
 
@@ -56,6 +62,9 @@
                         <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                             Type
                         </th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+    Location
+</th>
 
                         <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                             State
@@ -88,7 +97,31 @@
                             <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
                                 {{ $election->electionType->name }}
                             </td>
+<td class="px-6 py-4 text-sm text-slate-700">
 
+    @if ($election->lcda)
+
+        {{ $election->lcda->name }}
+
+    @elseif ($election->ward)
+
+        <div>{{ $election->lga->name }}</div>
+
+        <div class="text-xs text-slate-500">
+            {{ $election->ward->name }}
+        </div>
+
+    @elseif ($election->lga)
+
+        {{ $election->lga->name }}
+
+    @else
+
+        {{ $election->state->name }}
+
+    @endif
+
+</td>
                             <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-600">
                                 {{ $election->state->name }}
                             </td>

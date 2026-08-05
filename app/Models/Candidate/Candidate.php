@@ -3,6 +3,11 @@
 namespace App\Models\Candidate;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Candidate\CandidateDocument;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Nomination\Nomination;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+
 
 class Candidate extends Model
 {
@@ -28,4 +33,32 @@ class Candidate extends Model
         'nin_verified_at' => 'datetime',
         'is_active' => 'boolean',
     ];
+
+    public function getFullNameAttribute(): string
+{
+    return collect([
+        $this->first_name,
+        $this->middle_name,
+        $this->last_name,
+    ])
+        ->filter()
+        ->implode(' ');
+}
+
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+    public function documents()
+{
+    return $this->hasMany(CandidateDocument::class);
+}
+
+public function nomination(): HasOne
+{
+    return $this->hasOne(Nomination::class);
+}
+
 }

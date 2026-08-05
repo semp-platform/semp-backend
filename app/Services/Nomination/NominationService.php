@@ -21,144 +21,401 @@ class NominationService
     {
         return DB::transaction(function () use ($data) {
 
-            $election = Election::query()
-                ->where('is_active', true)
-                ->findOrFail($data['election_id']);
+            $election = $this->loadElection(
+                $data['election_id']
+            );
 
-            $position = Position::query()
-                ->where('is_active', true)
-                ->findOrFail($data['position_id']);
+            $position = $this->loadPosition(
+                $data['position_id']
+            );
 
-            $positionIsConfigured = $election->electionPositions()
-                ->where('position_id', $position->id)
-                ->where('is_active', true)
-                ->exists();
+            $this->validateElectionPosition(
+                $election,
+                $position
+            );
 
-            if (! $positionIsConfigured) {
-                throw ValidationException::withMessages([
-                    'position_id' => 'This position is not configured for the selected election.',
-                ]);
-            }
+            $location = $this->resolveLocation(
+                $election,
+                $position,
+                $data
+            );
 
-            $lgaId = null;
-            $wardId = null;
-
-            if (in_array($position->code, ['CHAIR', 'VICE'], true)) {
-
-                if (empty($data['lga_id'])) {
-                    throw ValidationException::withMessages([
-                        'lga_id' => 'An LGA is required for this position.',
-                    ]);
-                }
-
-                if (! empty($data['ward_id'])) {
-                    throw ValidationException::withMessages([
-                        'ward_id' => 'A ward must not be selected for this position.',
-                    ]);
-                }
-
-                $lga = Lga::query()
-                    ->where('id', $data['lga_id'])
-                    ->where('state_id', $election->state_id)
-                    ->where('is_active', true)
-                    ->first();
-
-                if (! $lga) {
-                    throw ValidationException::withMessages([
-                        'lga_id' => 'The selected LGA does not belong to the election state.',
-                    ]);
-                }
-
-                $lgaId = $lga->id;
-
-            } elseif ($position->code === 'COUNC') {
-
-                if (empty($data['ward_id'])) {
-                    throw ValidationException::withMessages([
-                        'ward_id' => 'A ward is required for Councillorship.',
-                    ]);
-                }
-
-                $ward = Ward::query()
-                    ->with('lga')
-                    ->where('id', $data['ward_id'])
-                    ->where('is_active', true)
-                    ->first();
-
-                if (! $ward || ! $ward->lga || $ward->lga->state_id !== $election->state_id) {
-                    throw ValidationException::withMessages([
-                        'ward_id' => 'The selected ward does not belong to the election state.',
-                    ]);
-                }
-
-                $wardId = $ward->id;
-                $lgaId = $ward->lga_id;
-
-            } else {
-                throw ValidationException::withMessages([
-                    'position_id' => 'Unsupported position.',
-                ]);
-            }
-
+            /*
+             * Find the candidate by NIN or verify
+             * the NIN and create the candidate.
+             */
             $candidate = $this->candidateService
-                ->findOrCreateFromNin($data['nin']);
+                ->findOrCreateFromNin(
+                    $data['nin']
+                );
 
-            $alreadyNominated = Nomination::query()
-                ->where('election_id', $election->id)
-                ->where('candidate_id', $candidate->id)
-                ->where('position_id', $position->id)
-                ->exists();
+            /*
+             * Prevent duplicate nominations.
+             */
+            $this->ensureCandidateNotAlreadyNominated(
+                $election,
+                $candidate->id,
+                $position
+            );
 
-            if ($alreadyNominated) {
-                throw ValidationException::withMessages([
-                    'nin' => 'This candidate has already been nominated for this position in this election.',
-                ]);
-            }
-
+            /*
+             * Create draft nomination.
+             */
             return Nomination::create([
-                'election_id' => $election->id,
+
+                'election_id'        => $election->id,
                 'political_party_id' => $data['political_party_id'],
-                'candidate_id' => $candidate->id,
-                'position_id' => $position->id,
-                'lga_id' => $lgaId,
-                'ward_id' => $wardId,
-                'status' => 'draft',
+                'candidate_id'       => $candidate->id,
+                'position_id'        => $position->id,
+
+                'lga_id'             => $location['lga_id'],
+                'ward_id'            => $location['ward_id'],
+                'lcda_id'            => $location['lcda_id'],
+
+                'status'             => 'draft',
+
             ])->load([
+
                 'election',
                 'politicalParty',
                 'candidate',
                 'position',
                 'lga',
                 'ward',
+                'lcda',
+
             ]);
+
         });
     }
+
     public function getAll()
-{
-    return Nomination::query()
-        ->with([
+    {
+        return Nomination::query()
+            ->with([
+                'election',
+                'politicalParty',
+                'candidate',
+                'position',
+                'lga',
+                'ward',
+                'lcda',
+            ])
+            ->latest()
+            ->get();
+    }
+
+    public function getById(int $id): Nomination
+    {
+        return Nomination::query()
+            ->with([
+                'election',
+                'politicalParty',
+                'candidate',
+                'position',
+                'lga',
+                'ward',
+                'lcda',
+            ])
+            ->findOrFail($id);
+    }
+
+    public function createForParty(
+        array $data,
+        int $politicalPartyId
+    ): Nomination {
+
+        $data['political_party_id'] = $politicalPartyId;
+
+        return $this->create($data);
+    }
+    public function updateForParty(
+    Nomination $nomination,
+    array $data,
+    int $politicalPartyId
+): Nomination {
+
+    return DB::transaction(function () use (
+        $nomination,
+        $data,
+        $politicalPartyId
+    ) {
+
+        /*
+         * Security check.
+         */
+        if ($nomination->political_party_id !== $politicalPartyId) {
+            abort(404);
+        }
+
+        /*
+         * Only draft nominations may be edited.
+         */
+        if ($nomination->status !== Nomination::STATUS_DRAFT) {
+            throw ValidationException::withMessages([
+                'nomination' =>
+                    'Only draft nominations can be edited.',
+            ]);
+        }
+
+        $election = $this->loadElection(
+            $data['election_id']
+        );
+
+        $position = $this->loadPosition(
+            $data['position_id']
+        );
+
+        $this->validateElectionPosition(
+            $election,
+            $position
+        );
+
+        $location = $this->resolveLocation(
+            $election,
+            $position,
+            $data
+        );
+
+        /*
+         * Ignore the nomination currently
+         * being edited.
+         */
+        $this->ensureCandidateNotAlreadyNominated(
+            $election,
+            $nomination->candidate_id,
+            $position,
+            $nomination
+        );
+
+        $nomination->update([
+
+            'election_id' => $election->id,
+
+            'position_id' => $position->id,
+
+            'lga_id' => $location['lga_id'],
+
+            'ward_id' => $location['ward_id'],
+
+            'lcda_id' => $location['lcda_id'],
+
+        ]);
+
+        return $nomination->fresh([
             'election',
             'politicalParty',
             'candidate',
             'position',
             'lga',
             'ward',
-        ])
-        ->latest()
-        ->get();
+            'lcda',
+        ]);
+
+    });
 }
 
-public function getById(int $id): Nomination
+public function markReadyForParty(
+    Nomination $nomination,
+    int $partyId
+): Nomination {
+
+    if ($nomination->political_party_id !== $partyId) {
+        abort(
+            403,
+            'This nomination does not belong to your political party.'
+        );
+    }
+
+   if (! $nomination->canBeMarkedReady()) {
+        abort(
+            403,
+           'This nomination cannot be marked as ready.'
+        );
+    }
+
+    $nomination->update([
+        'status' => Nomination::STATUS_READY,
+    ]);
+
+    return $nomination->fresh();
+}
+private function loadElection(int $electionId): Election
 {
-    return Nomination::query()
+    return Election::query()
         ->with([
-            'election',
-            'politicalParty',
-            'candidate',
-            'position',
+            'electionType',
+            'state',
             'lga',
             'ward',
+            'lcda',
         ])
-        ->findOrFail($id);
+        ->where('is_active', true)
+        ->findOrFail($electionId);
+}
+
+private function loadPosition(int $positionId): Position
+{
+    return Position::query()
+        ->where('is_active', true)
+        ->findOrFail($positionId);
+}
+
+private function validateElectionPosition(
+    Election $election,
+    Position $position
+): void {
+
+    $configured = $election
+        ->electionPositions()
+        ->where('position_id', $position->id)
+        ->where('is_active', true)
+        ->exists();
+
+    if (! $configured) {
+
+        throw ValidationException::withMessages([
+            'position_id' =>
+                'This position is not configured for the selected election.',
+        ]);
+
+    }
+}
+
+private function resolveLocation(
+    Election $election,
+    Position $position,
+    array $data
+): array {
+
+    /*
+     * If the election already has a location configured,
+     * use it. Otherwise, use the submitted values.
+     */
+    $lgaId  = $election->lga_id  ?? ($data['lga_id']  ?? null);
+    $wardId = $election->ward_id ?? ($data['ward_id'] ?? null);
+    $lcdaId = $election->lcda_id ?? ($data['lcda_id'] ?? null);
+
+    switch ($position->code) {
+
+        /*
+         * Chairmanship / Vice Chairmanship
+         */
+        case 'CHAIR':
+        case 'VICE':
+
+            if (! $lgaId) {
+                throw ValidationException::withMessages([
+                    'lga_id' => 'An LGA is required.',
+                ]);
+            }
+
+            $lga = Lga::query()
+                ->where('id', $lgaId)
+                ->where('state_id', $election->state_id)
+                ->where('is_active', true)
+                ->first();
+
+            if (! $lga) {
+                throw ValidationException::withMessages([
+                    'lga_id' =>
+                        'The selected LGA does not belong to the election state.',
+                ]);
+            }
+
+            /*
+             * Chairmanship never stores a ward.
+             */
+            $wardId = null;
+
+            break;
+
+        /*
+         * Councillorship
+         */
+        case 'COUNC':
+
+            if (! $lgaId) {
+                throw ValidationException::withMessages([
+                    'lga_id' =>
+                        'An LGA is required for Councillorship.',
+                ]);
+            }
+
+            if (! $wardId) {
+                throw ValidationException::withMessages([
+                    'ward_id' =>
+                        'A Ward is required for Councillorship.',
+                ]);
+            }
+
+            $lga = Lga::query()
+                ->where('id', $lgaId)
+                ->where('state_id', $election->state_id)
+                ->where('is_active', true)
+                ->first();
+
+            if (! $lga) {
+                throw ValidationException::withMessages([
+                    'lga_id' =>
+                        'The selected LGA does not belong to the election state.',
+                ]);
+            }
+
+            $ward = Ward::query()
+                ->where('id', $wardId)
+                ->where('lga_id', $lga->id)
+                ->where('is_active', true)
+                ->first();
+
+            if (! $ward) {
+                throw ValidationException::withMessages([
+                    'ward_id' =>
+                        'The selected Ward does not belong to the selected LGA.',
+                ]);
+            }
+
+            break;
+
+        default:
+
+            throw ValidationException::withMessages([
+                'position_id' => 'Unsupported position.',
+            ]);
+    }
+
+    return [
+
+        'lga_id'  => $lgaId,
+        'ward_id' => $wardId,
+        'lcda_id' => $lcdaId,
+
+    ];
+}
+
+private function ensureCandidateNotAlreadyNominated(
+    Election $election,
+    int $candidateId,
+    Position $position,
+    ?Nomination $ignore = null
+): void {
+
+    $query = Nomination::query()
+        ->where('election_id', $election->id)
+        ->where('candidate_id', $candidateId)
+        ->where('position_id', $position->id);
+
+    if ($ignore) {
+        $query->whereKeyNot($ignore->id);
+    }
+
+    if ($query->exists()) {
+
+        throw ValidationException::withMessages([
+            'position_id' =>
+                'This candidate has already been nominated for this position in this election.',
+        ]);
+
+    }
 }
 }

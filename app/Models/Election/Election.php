@@ -6,22 +6,44 @@ use App\Models\Reference\State;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Reference\Lga;
+use App\Models\Reference\Ward;
+use App\Models\Reference\Lcda;
+
+use App\Models\Nomination\Nomination;
+
 
 class Election extends Model
 {
     protected $fillable = [
-        'election_type_id',
-        'state_id',
-        'name',
-        'election_date',
-        'status',
-        'is_active',
-    ];
+    'election_type_id',
+    'state_id',
+    'name',
+    'election_date',
+
+    'nomination_open_date',
+    'nomination_close_date',
+    'screening_date',
+    'appeal_deadline',
+    'result_declaration_date',
+
+    'status',
+    'is_active',
+    'lga_id',
+    'ward_id',
+    'lcda_id',
+];
 
     protected $casts = [
-        'election_date' => 'date',
-        'is_active' => 'boolean',
-    ];
+    'election_date' => 'date',
+    'nomination_open_date' => 'date',
+    'nomination_close_date' => 'date',
+    'screening_date' => 'date',
+    'appeal_deadline' => 'date',
+    'result_declaration_date' => 'date',
+
+    'is_active' => 'boolean',
+];
 
     public function electionType(): BelongsTo
     {
@@ -35,6 +57,23 @@ class Election extends Model
     public function electionPositions(): HasMany
 {
     return $this->hasMany(ElectionPosition::class);
+    }
+    public function lga(): BelongsTo
+{
+    return $this->belongsTo(Lga::class);
 }
 
+public function ward(): BelongsTo
+{
+    return $this->belongsTo(Ward::class);
+}
+
+public function lcda(): BelongsTo
+{
+    return $this->belongsTo(Lcda::class);
+}
+public function nominations(): HasMany
+{
+    return $this->hasMany(Nomination::class);
+}
 }
