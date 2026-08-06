@@ -137,9 +137,26 @@
 
     <div class="mt-8 flex justify-end">
 
-    <div class="mt-8 flex justify-end">
+    @if($batch->status === \App\Models\Nomination\NominationBatch::STATUS_SUBMITTED)
 
-    @if(!$batch->hasPayment())
+        <div class="rounded-lg border border-blue-200 bg-blue-50 px-6 py-5 text-blue-700">
+
+            <p class="font-semibold">
+                Batch Submitted
+            </p>
+
+            <p class="mt-2 text-sm">
+                Your nomination batch has been submitted successfully.
+            </p>
+
+            <p class="mt-1 text-sm">
+                Status:
+                <strong>Awaiting Review</strong>
+            </p>
+
+        </div>
+
+    @elseif(!$batch->hasPayment())
 
         <div class="rounded-lg border border-amber-200 bg-amber-50 px-6 py-4 text-amber-700">
 
@@ -172,23 +189,31 @@
 
     @elseif($batch->canSubmit())
 
-        <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-6 py-4 text-emerald-700">
+        <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-6 py-5 text-emerald-700">
 
             <p class="font-semibold">
                 Payment Confirmed
             </p>
 
-            <p class="mt-1 text-sm">
-                You may now submit this batch to OGSIEC.
+            <p class="mt-2 text-sm">
+                Your batch is ready for submission to OGSIEC.
             </p>
 
-            {{-- We'll wire this route in the Nomination module --}}
-            {{-- <a
-                href="{{ route('party.nomination-batches.submit', $batch) }}"
-                class="mt-4 inline-flex rounded-lg bg-emerald-600 px-6 py-3 font-semibold text-white hover:bg-emerald-700"
+            <form
+                method="POST"
+                action="{{ route('party.nomination-batches.submit', $batch) }}"
+                class="mt-4"
             >
-                Submit to OGSIEC
-            </a> --}}
+                @csrf
+
+                <button
+                    type="submit"
+                    class="rounded-lg bg-emerald-600 px-6 py-3 font-semibold text-white hover:bg-emerald-700"
+                >
+                    Submit to OGSIEC
+                </button>
+
+            </form>
 
         </div>
 

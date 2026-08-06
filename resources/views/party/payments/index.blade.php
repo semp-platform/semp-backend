@@ -39,11 +39,11 @@
         <div class="rounded-xl border bg-white p-6">
 
             <p class="text-sm text-slate-500">
-                Pending
+                Pending Payment
             </p>
 
             <p class="mt-2 text-3xl font-bold text-amber-600">
-                {{ $payments->where('status', 'pending')->count() }}
+                {{ $payments->where('status', \App\Models\Payment\BatchPayment::STATUS_PENDING)->count() }}
             </p>
 
         </div>
@@ -51,11 +51,11 @@
         <div class="rounded-xl border bg-white p-6">
 
             <p class="text-sm text-slate-500">
-                Paid
+                Payment Confirmed
             </p>
 
             <p class="mt-2 text-3xl font-bold text-emerald-600">
-                {{ $payments->where('status', 'paid')->count() }}
+                {{ $payments->where('status', \App\Models\Payment\BatchPayment::STATUS_CONFIRMED)->count() }}
             </p>
 
         </div>
@@ -112,94 +112,147 @@
 
             <tbody class="divide-y">
 
-                @forelse($payments as $payment)
+            @forelse($payments as $payment)
 
-                    <tr>
+                <tr>
 
-                        <td class="px-6 py-4">
-                            {{ $payment->payment_reference }}
-                        </td>
+                    <td class="px-6 py-4">
+                        {{ $payment->payment_reference }}
+                    </td>
 
-                        <td class="px-6 py-4">
-                            {{ $payment->batch->batch_number }}
-                        </td>
+                    <td class="px-6 py-4">
+                        {{ $payment->batch->batch_number }}
+                    </td>
 
-                        <td class="px-6 py-4">
-                            {{ $payment->batch->election->name }}
-                        </td>
+                    <td class="px-6 py-4">
+                        {{ $payment->batch->election->name }}
+                    </td>
 
-                        <td class="px-6 py-4 text-right">
-                            ₦{{ number_format($payment->amount, 2) }}
-                        </td>
+                    <td class="px-6 py-4 text-right">
+                        ₦{{ number_format($payment->amount, 2) }}
+                    </td>
 
-                        <td class="px-6 py-4 text-center">
+                    <td class="px-6 py-4 text-center">
 
-                            @if ($payment->status === \App\Models\Payment\BatchPayment::STATUS_PENDING)
+                        @switch($payment->status)
+
+                            @case(\App\Models\Payment\BatchPayment::STATUS_PENDING)
 
                                 <span class="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
-                                    Pending
+                                    Pending Payment
                                 </span>
 
-                            @elseif ($payment->status === \App\Models\Payment\BatchPayment::STATUS_PAID)
+                                @break
+
+                            @case(\App\Models\Payment\BatchPayment::STATUS_PAID)
+
+                                <span class="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800">
+                                    Payment Received
+                                </span>
+
+                                @break
+
+                            @case(\App\Models\Payment\BatchPayment::STATUS_CONFIRMED)
 
                                 <span class="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
-                                    Paid
+                                    Payment Confirmed
                                 </span>
 
-                            @elseif ($payment->status === \App\Models\Payment\BatchPayment::STATUS_FAILED)
+                                @break
+
+                            @case(\App\Models\Payment\BatchPayment::STATUS_FAILED)
 
                                 <span class="inline-flex rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-800">
-                                    Failed
+                                    Payment Failed
                                 </span>
 
-                            @else
+                                @break
+
+                            @case(\App\Models\Payment\BatchPayment::STATUS_CANCELLED)
+
+                                <span class="inline-flex rounded-full bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-700">
+                                    Cancelled
+                                </span>
+
+                                @break
+
+                            @default
 
                                 <span class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
                                     {{ ucfirst($payment->status) }}
                                 </span>
 
-                            @endif
+                        @endswitch
 
-                        </td>
+                    </td>
 
-                        <td class="px-6 py-4 text-center">
+                    <td class="px-6 py-4 text-center">
+
+                        @if($payment->status === \App\Models\Payment\BatchPayment::STATUS_PENDING)
 
                             <a
                                 href="{{ route('party.payments.show', $payment) }}"
                                 class="inline-flex rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
                             >
-                                @if($payment->status === \App\Models\Payment\BatchPayment::STATUS_PENDING)
-
-    Review & Pay
-
-@elseif($payment->status === \App\Models\Payment\BatchPayment::STATUS_PAID)
-
-    View Payment
-
-@else
-
-    Retry Payment
-
-@endif
+                                Review &amp; Pay
                             </a>
 
-                        </td>
+                        @elseif($payment->status === \App\Models\Payment\BatchPayment::STATUS_PAID)
 
-                    </tr>
+                            <a
+                                href="{{ route('party.payments.show', $payment) }}"
+                                class="inline-flex rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                            >
+                                View Payment
+                            </a>
 
-                @empty
+                        @elseif($payment->status === \App\Models\Payment\BatchPayment::STATUS_CONFIRMED)
 
-                    <tr>
+                            <a
+                                href="{{ route('party.payments.receipt', $payment) }}"
+                                class="inline-flex rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+                            >
+                                View Receipt
+                            </a>
 
-                        <td colspan="6" class="px-6 py-12 text-center text-slate-500">
+                        @elseif(
+                            in_array(
+                                $payment->status,
+                                [
+                                    \App\Models\Payment\BatchPayment::STATUS_FAILED,
+                                    \App\Models\Payment\BatchPayment::STATUS_CANCELLED,
+                                ]
+                            )
+                        )
 
-                            No payments found.
+                            <a
+                                href="{{ route('party.payments.show', $payment) }}"
+                                class="inline-flex rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700"
+                            >
+                                Retry Payment
+                            </a>
 
-                        </td>
+                        @else
 
-                    </tr>
+                            <span class="text-slate-400">—</span>
 
-                @endforelse
+                        @endif
+
+                    </td>
+
+                </tr>
+
+            @empty
+
+                <tr>
+
+                    <td colspan="6" class="px-6 py-12 text-center text-slate-500">
+                        No payments found.
+                    </td>
+
+                </tr>
+
+            @endforelse
 
             </tbody>
 

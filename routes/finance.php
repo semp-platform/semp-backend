@@ -31,7 +31,7 @@ Route::prefix('finance')
 
         /*
         |--------------------------------------------------------------------------
-        | Batch Payments
+        | Payments
         |--------------------------------------------------------------------------
         */
 
@@ -49,10 +49,23 @@ Route::prefix('finance')
         ->middleware('permission:payments.verify')
         ->name('payments.confirm');
 
+        /*
+        |--------------------------------------------------------------------------
+        | Receipts
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/payments/receipts',
+            [FinancePaymentController::class, 'receipts']
+        )
+        ->middleware('permission:payments.view')
+        ->name('payments.receipts');
+
         Route::get(
             '/payments/{batchPayment}/receipt',
-            [FinancePaymentController::class, 'receipt']
-        )
+            [FinancePaymentController::class, 'receipt'
+        ])
         ->middleware('permission:payments.view')
         ->name('payments.receipt');
 
@@ -75,5 +88,19 @@ Route::prefix('finance')
         )
         ->middleware('permission:reports.view')
         ->name('reports.index');
+
+        Route::get(
+            '/reports/payments-by-party',
+            [FinanceReportController::class, 'paymentsByParty']
+        )
+        ->middleware('permission:reports.view')
+        ->name('reports.party');
+
+        Route::get(
+            '/reports/transactions',
+            [FinanceReportController::class, 'transactionHistory']
+        )
+        ->middleware('permission:reports.view')
+        ->name('reports.transactions');
 
     });

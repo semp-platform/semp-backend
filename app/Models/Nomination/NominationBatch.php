@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Payment\BatchPayment;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Models\Nomination\BatchWorkflow;
 
 
 class NominationBatch extends Model
@@ -52,6 +53,7 @@ class NominationBatch extends Model
         'submitted_by',
         'paid_at',
         'submitted_at',
+        'current_department',
     ];
 
     protected $casts = [
@@ -124,10 +126,27 @@ public function isAwaitingFinanceConfirmation(): bool
         $this->payment->isPaid();
 }
 
+
+
 public function canSubmit(): bool
 {
     return $this->payment &&
         $this->payment->isConfirmed();
+}
+
+/*
+|--------------------------------------------------------------------------
+| Workflow
+|--------------------------------------------------------------------------
+*/
+
+public function workflows(): HasMany
+{
+    return $this->hasMany(
+        BatchWorkflow::class,
+        'nomination_batch_id'
+    )
+    ->orderBy('acted_at');
 }
 }
 

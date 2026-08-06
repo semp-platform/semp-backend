@@ -9,7 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use App\Services\Nomination\NominationBatchService;
 use Illuminate\Http\RedirectResponse;
-
+use App\Enums\Department;
+use App\Enums\WorkflowAction;
+use App\Models\Nomination\BatchWorkflow;
 
 class NominationBatchController extends Controller
 {
@@ -138,4 +140,81 @@ public function __construct(
             'batch' => $nominationBatch,
         ]);
     }
+
+    /**
+ * Submit a nomination batch to OGSIEC.
+ */
+public function submit(
+    Request $request,
+    NominationBatch $nominationBatch
+): RedirectResponse {
+
+    $party = $this->currentParty($request);
+
+    abort_unless(
+        $nominationBatch->political_party_id === $party->id,
+        403
+    );
+
+    if ($nominationBatch->status === NominationBatch::STATUS_SUBMITTED) {
+
+    return back()->with(
+        'success',
+        'This nomination batch has already been submitted.'
+    );
+
 }
+
+    $nominationBatch->load('payment');
+
+    if (! $nominationBatch->canSubmit()) {
+
+        return back()->withErrors([
+            'batch' => 'This batch cannot be submitted yet.',
+        ]);
+
+    }
+
+    $nominationBatch->status = NominationBatch::STATUS_SUBMITTED;
+
+$nominationBatch->current_department = Department::ICT->value;
+
+$nominationBatch->submitted_by = $request->user()->id;
+
+$nominationBatch->submitted_at = now();
+
+$nominationBatch->save();
+
+
+    BatchWorkflow::create([
+
+        'nomination_batch_id' => $nominationBatch->id,
+
+        'department' => Department::Party->value,
+
+        'action' => WorkflowAction::Submitted->value,
+
+        'remarks' => 'Nomination batch submitted to OGSIEC.',
+
+        'acted_by' => $request->user()->id,
+
+        'acted_at' => now(),
+
+    ]);
+
+    return redirect()
+        ->route(
+            'party.nomination-batches.show',
+            $nominationBatch
+        )
+        ->with(
+            'success',
+            'Nomination batch submitted successfully.'
+        );
+}
+
+
+}
+
+
+

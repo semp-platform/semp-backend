@@ -31,9 +31,7 @@
             </p>
 
             <p class="mt-3 text-3xl font-bold">
-
                 {{ $totalPayments }}
-
             </p>
 
         </div>
@@ -45,9 +43,7 @@
             </p>
 
             <p class="mt-3 text-3xl font-bold text-amber-600">
-
                 {{ $pendingPayments }}
-
             </p>
 
         </div>
@@ -59,9 +55,7 @@
             </p>
 
             <p class="mt-3 text-3xl font-bold text-blue-600">
-
                 {{ $paidPayments }}
-
             </p>
 
         </div>
@@ -73,9 +67,7 @@
             </p>
 
             <p class="mt-3 text-3xl font-bold text-emerald-600">
-
                 {{ $confirmedPayments }}
-
             </p>
 
         </div>
@@ -87,9 +79,7 @@
             </p>
 
             <p class="mt-3 text-2xl font-bold">
-
-                ₦{{ number_format($totalRevenue,2) }}
-
+                ₦{{ number_format($totalRevenue, 2) }}
             </p>
 
         </div>
@@ -103,25 +93,38 @@
             <div>
 
                 <h2 class="text-lg font-semibold">
-
                     Payment Verification
-
                 </h2>
 
-                <p class="text-slate-500">
+                @if($pendingPayments > 0)
 
-                    Review payments awaiting confirmation.
+                    <p class="text-slate-500">
+                        There {{ $pendingPayments == 1 ? 'is' : 'are' }}
+                        <strong>{{ $pendingPayments }}</strong>
+                        payment{{ $pendingPayments == 1 ? '' : 's' }}
+                        awaiting finance confirmation.
+                    </p>
 
-                </p>
+                @else
+
+                    <p class="text-emerald-600 font-medium">
+                        ✓ All payments have been reviewed and confirmed.
+                    </p>
+
+                @endif
 
             </div>
 
-            <a
-                href="{{ route('finance.payments.index') }}"
-                class="rounded-lg bg-emerald-600 px-5 py-3 font-semibold text-white hover:bg-emerald-700"
-            >
-                Open Payments
-            </a>
+            @if($pendingPayments > 0)
+
+                <a
+                    href="{{ route('finance.payments.index') }}"
+                    class="rounded-lg bg-emerald-600 px-5 py-3 font-semibold text-white hover:bg-emerald-700"
+                >
+                    Open Payments
+                </a>
+
+            @endif
 
         </div>
 
