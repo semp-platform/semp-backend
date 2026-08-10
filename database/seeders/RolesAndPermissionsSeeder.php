@@ -27,30 +27,29 @@ class RolesAndPermissionsSeeder extends Seeder
             'elections.update',
             'elections.activate',
 
-            // OGSIEC nomination administration
+            // Nomination workflow
             'nominations.view',
             'nominations.review',
             'nominations.approve',
-            'nominations.reject',
 
             // Political party nomination activities
-'party-nominations.view',
-'party-nominations.create',
-'party-nominations.update',
-'party-nominations.submit',
-'party-nominations.withdraw',
-'party-nominations.replace',
+            'party-nominations.view',
+            'party-nominations.create',
+            'party-nominations.update',
+            'party-nominations.submit',
+            'party-nominations.withdraw',
+            'party-nominations.replace',
 
-// Candidate withdrawals
-'party-withdrawals.view',
-'party-withdrawals.create',
-'party-withdrawals.submit',
-'party-payments.view',
+            // Candidate withdrawals
+            'party-withdrawals.view',
+            'party-withdrawals.create',
+            'party-withdrawals.submit',
+            'party-payments.view',
 
-'withdrawals.view',
-'withdrawals.review',
-'withdrawals.approve',
-'withdrawals.reject',
+            'withdrawals.view',
+            'withdrawals.review',
+            'withdrawals.approve',
+            'withdrawals.reject',
 
             // Candidate information
             'candidates.view',
@@ -60,11 +59,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'parties.manage',
 
             // Document Management
-'document-types.view',
-'document-types.create',
-'document-types.update',
-'document-types.activate',
-'document-types.deactivate',
+            'document-types.view',
+            'document-types.create',
+            'document-types.update',
+            'document-types.activate',
+            'document-types.deactivate',
 
             // Payments
             'payments.view',
@@ -73,6 +72,10 @@ class RolesAndPermissionsSeeder extends Seeder
             // Reports and audit
             'reports.view',
             'audit.view',
+
+            // Department-specific nomination permissions
+            'legal.view',
+            'legal.review',
 
             // System administration
             'reference-data.manage',
@@ -87,20 +90,25 @@ class RolesAndPermissionsSeeder extends Seeder
             ]);
         }
 
-
         /*
         |--------------------------------------------------------------------------
         | Super Admin
         |--------------------------------------------------------------------------
         */
 
-        $superAdmin = Role::firstOrCreate([
-            'name' => 'Super Admin',
-            'guard_name' => 'web',
-        ]);
+        $superAdmin = Role::updateOrCreate(
+            [
+                'name' => 'Super Admin',
+                'guard_name' => 'web',
+            ],
+            [
+                'dashboard_route' => 'dashboard',
+            ]
+        );
 
-        $superAdmin->syncPermissions(Permission::all());
-
+        $superAdmin->syncPermissions(
+            Permission::where('guard_name', 'web')->get()
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -108,10 +116,15 @@ class RolesAndPermissionsSeeder extends Seeder
         |--------------------------------------------------------------------------
         */
 
-        $electionAdministrator = Role::firstOrCreate([
-            'name' => 'Election Administrator',
-            'guard_name' => 'web',
-        ]);
+        $electionAdministrator = Role::updateOrCreate(
+            [
+                'name' => 'Election Administrator',
+                'guard_name' => 'web',
+            ],
+            [
+                'dashboard_route' => 'dashboard',
+            ]
+        );
 
         $electionAdministrator->syncPermissions([
             'elections.view',
@@ -126,17 +139,21 @@ class RolesAndPermissionsSeeder extends Seeder
             'reports.view',
         ]);
 
-
         /*
         |--------------------------------------------------------------------------
         | Nomination Officer
         |--------------------------------------------------------------------------
         */
 
-        $nominationOfficer = Role::firstOrCreate([
-            'name' => 'Nomination Officer',
-            'guard_name' => 'web',
-        ]);
+        $nominationOfficer = Role::updateOrCreate(
+            [
+                'name' => 'Nomination Officer',
+                'guard_name' => 'web',
+            ],
+            [
+                'dashboard_route' => 'dashboard',
+            ]
+        );
 
         $nominationOfficer->syncPermissions([
             'elections.view',
@@ -151,17 +168,21 @@ class RolesAndPermissionsSeeder extends Seeder
             'reports.view',
         ]);
 
-
         /*
         |--------------------------------------------------------------------------
         | Finance Officer
         |--------------------------------------------------------------------------
         */
 
-        $financeOfficer = Role::firstOrCreate([
-            'name' => 'Finance Officer',
-            'guard_name' => 'web',
-        ]);
+        $financeOfficer = Role::updateOrCreate(
+            [
+                'name' => 'Finance Officer',
+                'guard_name' => 'web',
+            ],
+            [
+                'dashboard_route' => 'finance.dashboard',
+            ]
+        );
 
         $financeOfficer->syncPermissions([
             'elections.view',
@@ -174,17 +195,106 @@ class RolesAndPermissionsSeeder extends Seeder
             'reports.view',
         ]);
 
+        /*
+        |--------------------------------------------------------------------------
+        | ICT Officer
+        |--------------------------------------------------------------------------
+        */
+
+        $ictOfficer = Role::updateOrCreate(
+            [
+                'name' => 'ICT Officer',
+                'guard_name' => 'web',
+            ],
+            [
+                'dashboard_route' => 'staff.ict.nomination-batches.index',
+            ]
+        );
+
+        $ictOfficer->syncPermissions([
+            'nominations.view',
+            'nominations.review',
+
+            'candidates.view',
+            'parties.view',
+        ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Election and Party Monitoring Officer
+        |--------------------------------------------------------------------------
+        */
+
+        $epmOfficer = Role::updateOrCreate(
+            [
+                'name' => 'EPM Officer',
+                'guard_name' => 'web',
+            ],
+            [
+                'dashboard_route' => 'staff.epm.nominations.index',
+            ]
+        );
+
+        $epmOfficer->syncPermissions([
+            'nominations.view',
+            'nominations.review',
+
+            'candidates.view',
+            'parties.view',
+        ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Legal Officer
+        |--------------------------------------------------------------------------
+        */
+
+        $legalOfficer = Role::updateOrCreate(
+            [
+                'name' => 'Legal Officer',
+                'guard_name' => 'web',
+            ],
+            [
+                'dashboard_route' => 'staff.legal.nominations.index',
+            ]
+        );
+
+        $legalOfficer->syncPermissions([
+            'legal.view',
+            'legal.review',
+
+            'nominations.view',
+            'nominations.review',
+
+            'candidates.view',
+            'parties.view',
+        ]);
 
         /*
         |--------------------------------------------------------------------------
         | Approving Officer
         |--------------------------------------------------------------------------
+        |
+        | This role represents the Commissioner / approving authority.
+        |
+        | IMPORTANT:
+        | The Commissioner does NOT have nominations.reject.
+        |
+        | The Commissioner can:
+        | - approve
+        | - return based on screening recommendations
+        |
         */
 
-        $approvingOfficer = Role::firstOrCreate([
-            'name' => 'Approving Officer',
-            'guard_name' => 'web',
-        ]);
+        $approvingOfficer = Role::updateOrCreate(
+            [
+                'name' => 'Approving Officer',
+                'guard_name' => 'web',
+            ],
+            [
+                'dashboard_route' => 'staff.commissioner.nominations.index',
+            ]
+        );
 
         $approvingOfficer->syncPermissions([
             'elections.view',
@@ -192,12 +302,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'nominations.view',
             'nominations.review',
             'nominations.approve',
-            'nominations.reject',
-            'withdrawals.view',
 
-'withdrawals.review',
-'withdrawals.approve',
-'withdrawals.reject',
+            'withdrawals.view',
+            'withdrawals.review',
+            'withdrawals.approve',
+            'withdrawals.reject',
 
             'candidates.view',
             'parties.view',
@@ -206,17 +315,21 @@ class RolesAndPermissionsSeeder extends Seeder
             'reports.view',
         ]);
 
-
         /*
         |--------------------------------------------------------------------------
         | Political Party Officer
         |--------------------------------------------------------------------------
         */
 
-        $partyOfficer = Role::firstOrCreate([
-            'name' => 'Political Party Officer',
-            'guard_name' => 'web',
-        ]);
+        $partyOfficer = Role::updateOrCreate(
+            [
+                'name' => 'Political Party Officer',
+                'guard_name' => 'web',
+            ],
+            [
+                'dashboard_route' => 'party.dashboard',
+            ]
+        );
 
         $partyOfficer->syncPermissions([
             'elections.view',
@@ -227,15 +340,20 @@ class RolesAndPermissionsSeeder extends Seeder
             'party-nominations.submit',
             'party-nominations.withdraw',
             'party-nominations.replace',
+
             'party-withdrawals.view',
-'party-withdrawals.create',
-'party-withdrawals.submit',
-'party-payments.view',
+            'party-withdrawals.create',
+            'party-withdrawals.submit',
+
+            'party-payments.view',
         ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Clear permission cache
+        |--------------------------------------------------------------------------
+        */
 
         app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
-
-
-    }
-
+}

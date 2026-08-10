@@ -11,6 +11,8 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use App\Models\Nomination\Nomination;
+use Illuminate\Support\Facades\Storage;
+
 
 
 class CandidateDocumentController extends Controller
@@ -211,4 +213,28 @@ class CandidateDocumentController extends Controller
             'Supporting documents completed successfully.'
         );
 }
-}
+/**
+ * View a candidate document.
+ */
+/**
+ * View a candidate document.
+ */
+public function view(
+    CandidateDocument $document
+) {
+    abort_unless(
+        Storage::disk($document->disk)->exists($document->path),
+        404
+    );
+
+    return Storage::disk($document->disk)->response(
+        $document->path,
+        $document->original_name,
+        [
+            'Content-Type' => $document->mime_type,
+            'Content-Disposition' => 'inline; filename="' .
+                addslashes($document->original_name) .
+                '"',
+        ]
+    );
+}}

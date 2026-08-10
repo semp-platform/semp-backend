@@ -6,6 +6,7 @@ use App\Models\DocumentType;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CandidateDocument extends Model
 {
@@ -62,4 +63,11 @@ class CandidateDocument extends Model
             'verified_by'
         );
     }
+    public function reviewRequests(): HasMany
+{
+    return $this->hasMany(
+        CandidateDocumentReviewRequest::class,
+        'candidate_document_id'
+    );
+}
 }

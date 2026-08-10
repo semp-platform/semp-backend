@@ -24,6 +24,12 @@ class NominationService
             $election = $this->loadElection(
                 $data['election_id']
             );
+            if ($election->status !== 'nominations_open') {
+    throw ValidationException::withMessages([
+        'election_id' =>
+            'This election is not currently accepting nominations.',
+    ]);
+}
 
             $position = $this->loadPosition(
                 $data['position_id']
@@ -148,6 +154,15 @@ class NominationService
             abort(404);
         }
 
+        $nomination->loadMissing('election');
+
+        if ($nomination->election->status !== 'nominations_open') {
+            throw ValidationException::withMessages([
+                'nomination' =>
+                    'This election is not currently accepting nomination changes.',
+            ]);
+        }
+
         /*
          * Only draft nominations may be edited.
          */
@@ -227,10 +242,19 @@ public function markReadyForParty(
         );
     }
 
-   if (! $nomination->canBeMarkedReady()) {
+    $nomination->loadMissing('election');
+
+    if ($nomination->election->status !== 'nominations_open') {
+        throw ValidationException::withMessages([
+            'nomination' =>
+                'This election is not currently accepting nominations.',
+        ]);
+    }
+
+    if (! $nomination->canBeMarkedReady()) {
         abort(
             403,
-           'This nomination cannot be marked as ready.'
+            'This nomination cannot be marked as ready.'
         );
     }
 
@@ -240,6 +264,7 @@ public function markReadyForParty(
 
     return $nomination->fresh();
 }
+
 private function loadElection(int $electionId): Election
 {
     return Election::query()

@@ -1,63 +1,46 @@
-<!DOCTYPE html>
-<html lang="en">
+<meta charset="UTF-8">
 
-<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta charset="UTF-8">
+<title>
+    @yield('title') | SEMP
+</title>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+@vite([
+    'resources/css/app.css',
+    'resources/js/app.js'
+])
 
-    <title>
-        @yield('title') | SEMP
-    </title>
+<div class="flex min-h-screen bg-slate-100">
 
-    @vite([
-        'resources/css/app.css',
-        'resources/js/app.js'
-    ])
+    @include('components.staff.sidebar')
 
-</head>
+    <div class="flex min-h-screen flex-1 flex-col">
 
-<body class="min-h-screen bg-slate-100">
+        @include('components.staff.header')
 
-    <div class="flex min-h-screen">
+        <main class="flex-1 bg-slate-100 p-8">
 
-        @include('components.staff.sidebar')
+            @if(session('success'))
 
-        <div class="flex flex-1 flex-col">
+                <div class="mb-6 rounded-lg bg-emerald-100 p-4 text-emerald-700">
+                    {{ session('success') }}
+                </div>
 
-            @include('components.staff.header')
+            @endif
 
-            <main class="flex-1 p-8">
+            @if($errors->any())
 
-                @if(session('success'))
+                <div class="mb-6 rounded-lg bg-red-100 p-4 text-red-700">
+                    {{ $errors->first() }}
+                </div>
 
-                    <div class="mb-6 rounded-lg bg-emerald-100 p-4 text-emerald-700">
+            @endif
 
-                        {{ session('success') }}
+            @yield('content')
 
-                    </div>
-
-                @endif
-
-                @if($errors->any())
-
-                    <div class="mb-6 rounded-lg bg-red-100 p-4 text-red-700">
-
-                        {{ $errors->first() }}
-
-                    </div>
-
-                @endif
-
-                @yield('content')
-
-            </main>
-
-        </div>
+        </main>
 
     </div>
 
-</body>
-
-</html>
+</div>

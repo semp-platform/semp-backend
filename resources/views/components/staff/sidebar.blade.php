@@ -1,41 +1,55 @@
-@role('Finance Officer')
+<aside class="hidden min-h-screen w-64 shrink-0 flex-col bg-slate-900 text-white lg:flex">
 
-    @include('components.staff.sidebars.finance-officer')
+    @role('ICT Officer')
 
-@elserole('Nomination Officer')
+        @include('components.staff.sidebars.ict')
 
-    @include('components.staff.sidebars.nomination-officer')
+    @elserole('EPM Officer')
 
-@elserole('Senior Nomination Officer')
+        @include('components.staff.sidebars.epm')
 
-    @include('components.staff.sidebars.senior-nomination-officer')
+    @elserole('Legal Officer')
 
-@elserole('Operations Officer')
+        @include('components.staff.sidebars.legal')
 
-    @include('components.staff.sidebars.operations-officer')
+    @elserole('Approving Officer')
 
-@elserole('Communications Officer')
+        @include('components.staff.sidebars.commissioner')
 
-    @include('components.staff.sidebars.communications-officer')
+    @elserole('Finance Officer')
 
-@elserole('Commissioner')
+        @include('components.staff.sidebars.finance-officer')
 
-    @include('components.staff.sidebars.commissioner')
+    @elserole('Political Party Officer')
 
-@elserole('Election Administrator')
+        @include('components.staff.sidebars.political-party')
 
-    @include('components.staff.sidebars.election-administrator')
+    @elserole('Election Administrator')
 
-@else
+        @include('components.staff.sidebars.election-administrator')
 
-    <aside class="hidden w-72 bg-slate-900 text-white lg:flex items-center justify-center">
+    @elserole('Super Admin')
 
-        <div class="text-center">
+        @include('components.staff.sidebars.admin')
 
-            No sidebar configured.
+    @else
+
+        <div class="flex flex-1 items-center justify-center px-6">
+
+            <div class="text-center">
+
+                <p class="font-semibold">
+                    No sidebar configured.
+                </p>
+
+                <p class="mt-2 text-sm text-slate-400">
+                    Please contact the system administrator.
+                </p>
+
+            </div>
 
         </div>
 
-    </aside>
+    @endrole
 
-@endrole
+</aside>

@@ -181,15 +181,24 @@
             <p class="mt-1 text-sm">
                 You may now submit this batch to OGSIEC.
             </p>
+<form
+    method="POST"
+    action="{{ route('party.nomination-batches.submit', $batch) }}"
+    class="mt-4"
+>
+    @csrf
 
-            {{-- We'll wire this route in the Nomination module --}}
-            {{-- <a
-                href="{{ route('party.nomination-batches.submit', $batch) }}"
-                class="mt-4 inline-flex rounded-lg bg-emerald-600 px-6 py-3 font-semibold text-white hover:bg-emerald-700"
-            >
-                Submit to OGSIEC
-            </a> --}}
+    @if($batch->canSubmit())
+    <form method="POST"
+          action="{{ route('party.nomination-batches.submit', $batch) }}">
+        @csrf
 
+        <button type="submit">
+            Submit to OGSIEC
+        </button>
+    </form>
+@endif
+</form>
         </div>
 
     @endif

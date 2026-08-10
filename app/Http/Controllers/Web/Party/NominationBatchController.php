@@ -138,4 +138,29 @@ public function __construct(
             'batch' => $nominationBatch,
         ]);
     }
+
+    public function submit(
+    Request $request,
+    NominationBatch $nominationBatch
+): RedirectResponse {
+
+    $party = $this->currentParty($request);
+
+    abort_unless(
+        $nominationBatch->political_party_id === $party->id,
+        403
+    );
+
+    $this->batchService->submitBatch(
+        $nominationBatch,
+        $request->user()->id
+    );
+
+    return redirect()
+        ->route('party.nomination-batches.show', $nominationBatch)
+        ->with(
+            'success',
+            'Nomination batch submitted to OGSIEC successfully.'
+        );
+}
 }

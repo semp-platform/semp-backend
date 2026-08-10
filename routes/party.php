@@ -161,6 +161,13 @@ Route::get(
             'show',
         ]);
 
+
+        Route::post(
+    '/nomination-batches/{nominationBatch}/submit',
+    [NominationBatchController::class, 'submit']
+)
+->middleware('permission:party-nominations.submit')
+->name('nomination-batches.submit');
         /*
         |--------------------------------------------------------------------------
         | Party Payments

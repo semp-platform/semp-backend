@@ -222,11 +222,12 @@
     >
 
     <button
-        type="submit"
-        class="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
-    >
-        Create Batch
-    </button>
+    type="submit"
+    onclick="this.disabled = true; this.innerText = 'Creating Batch...'; this.form.submit();"
+    class="rounded-lg bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+>
+    Create Batch
+</button>
 
 </form>
 

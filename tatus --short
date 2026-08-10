@@ -1,0 +1,20 @@
+ app/Http/Controllers/Web/Auth/LoginController.php  | 158 [32m+++++++[m[31m------[m
+ .../Web/Party/CandidateDocumentController.php      |  28 [32m++[m[31m-[m
+ .../Web/Party/NominationBatchController.php        |  25 [32m++[m
+ app/Models/Candidate/CandidateDocument.php         |   8 [32m+[m
+ app/Models/Nomination/Nomination.php               | 254 [32m+++++++++++++[m[31m--------[m
+ app/Models/Nomination/NominationBatch.php          |  46 [32m++[m[31m--[m
+ app/Models/User.php                                |  44 [32m++[m[31m--[m
+ app/Services/Nomination/NominationBatchService.php | 126 [32m++++++++[m[31m--[m
+ app/Services/Nomination/NominationService.php      |  29 [32m++[m[31m-[m
+ bootstrap/app.php                                  |  11 [32m+[m[31m-[m
+ database/seeders/RolesAndPermissionsSeeder.php     | 250 [32m++++++++++++++[m[31m------[m
+ resources/views/components/staff/sidebar.blade.php |  54 [32m+++[m[31m--[m
+ .../staff/sidebars/finance-officer.blade.php       |  79 [32m+++[m[31m----[m
+ resources/views/layouts/staff.blade.php            |  71 [32m+++[m[31m---[m
+ .../party/nomination-batches/create.blade.php      |  11 [32m+[m[31m-[m
+ .../views/party/nomination-batches/show.blade.php  |  27 [32m++[m[31m-[m
+ routes/elections.php                               |  16 [32m+[m[31m-[m
+ routes/party.php                                   |   7 [32m+[m
+ routes/web.php                                     |  37 [32m+[m[31m--[m
+ 19 files changed, 837 insertions(+), 444 deletions(-)

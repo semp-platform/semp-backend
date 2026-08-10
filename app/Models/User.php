@@ -44,28 +44,28 @@ class User extends Authenticatable
     }
 
     public function politicalParties(): BelongsToMany
-{
-    return $this->belongsToMany(
-        PoliticalParty::class,
-        'political_party_users'
-    )
-        ->withPivot('is_active')
-        ->withTimestamps();
-}
-public function uploadedCandidateDocuments()
-{
-    return $this->hasMany(
-        CandidateDocument::class,
-        'uploaded_by'
-    );
-}
+    {
+        return $this->belongsToMany(
+            PoliticalParty::class,
+            'political_party_users'
+        )
+            ->withPivot('is_active')
+            ->withTimestamps();
+    }
 
-public function verifiedCandidateDocuments()
-{
-    return $this->hasMany(
-        CandidateDocument::class,
-        'verified_by'
-    );
-}
+    public function uploadedCandidateDocuments()
+    {
+        return $this->hasMany(
+            CandidateDocument::class,
+            'uploaded_by'
+        );
+    }
 
+    public function verifiedCandidateDocuments()
+    {
+        return $this->hasMany(
+            CandidateDocument::class,
+            'verified_by'
+        );
+    }
 }

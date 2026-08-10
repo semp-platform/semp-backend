@@ -12,8 +12,22 @@ use Illuminate\Support\Facades\Route;
 Route::get(
     '/',
     function () {
-        if (auth()->user()->hasRole('Political Party Officer')) {
+        $user = auth()->user();
+
+        if ($user->hasRole('Political Party Officer')) {
             return redirect()->route('party.dashboard');
+        }
+
+        if ($user->hasRole('ICT Officer')) {
+            return redirect()->route('staff.ict.nomination-batches.index');
+        }
+
+        if ($user->hasRole('EPM Officer')) {
+            return redirect()->route('staff.epm.nominations.index');
+        }
+
+        if ($user->hasRole('Finance Officer')) {
+            return redirect()->route('finance.dashboard');
         }
 
         return redirect()->route('dashboard');

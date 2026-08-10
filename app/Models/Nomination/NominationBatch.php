@@ -39,25 +39,27 @@ class NominationBatch extends Model
     public const PAYMENT_FAILED = 'failed';
 
     protected $fillable = [
-        'batch_number',
-        'election_id',
-        'political_party_id',
-        'nomination_batch_id',
-        'candidate_count',
-        'total_nomination_fee',
-        'amount_paid',
-        'payment_status',
-        'status',
-        'created_by',
-        'submitted_by',
-        'paid_at',
-        'submitted_at',
-    ];
+    'batch_number',
+    'election_id',
+    'political_party_id',
+    'nomination_batch_id',
+    'candidate_count',
+    'total_nomination_fee',
+    'amount_paid',
+    'payment_status',
+    'status',
+    'created_by',
+    'submitted_by',
+    'paid_at',
+    'submitted_at',
+    'received_at',
+];
 
-    protected $casts = [
-        'paid_at' => 'datetime',
-        'submitted_at' => 'datetime',
-    ];
+protected $casts = [
+    'paid_at' => 'datetime',
+    'submitted_at' => 'datetime',
+    'received_at' => 'datetime',
+];
 
     /*
     |--------------------------------------------------------------------------
@@ -126,8 +128,10 @@ public function isAwaitingFinanceConfirmation(): bool
 
 public function canSubmit(): bool
 {
-    return $this->payment &&
-        $this->payment->isConfirmed();
+    return $this->status === self::STATUS_PAID
+        && $this->payment
+        && $this->payment->isConfirmed()
+        && $this->nominations()->exists();
 }
 }
 

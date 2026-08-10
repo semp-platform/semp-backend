@@ -1,0 +1,113 @@
+<div class="border-b border-slate-800 px-6 py-6">
+    <div class="text-lg font-bold">
+        EPM
+    </div>
+
+    <div class="mt-1 text-sm text-slate-400">
+        OGSIEC Staff
+    </div>
+</div>
+
+<nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1">
+
+    {{-- Dashboard --}}
+    <a
+        href="#"
+        class="block rounded-lg px-4 py-3 text-sm font-medium text-white hover:bg-slate-800"
+    >
+        Dashboard
+    </a>
+
+    {{-- Nomination Management --}}
+    <div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
+        Nomination Management
+    </div>
+
+    <a
+        href="{{ route('staff.epm.nominations.index') }}"
+        class="block rounded-lg px-4 py-3 text-sm font-medium text-white hover:bg-slate-800"
+    >
+        Nominations
+    </a>
+
+    {{-- Candidate Records --}}
+    <div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
+        Candidate Records
+    </div>
+
+    <a
+        href="#"
+        class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
+    >
+        Candidates
+    </a>
+
+    {{-- Political Parties --}}
+    <div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
+        Political Parties
+    </div>
+
+    <a
+        href="#"
+        class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
+    >
+        Political Parties
+    </a>
+
+    {{-- Monitoring --}}
+    <div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
+        Monitoring
+    </div>
+
+    <a
+        href="#"
+        class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
+    >
+        Primary Monitoring
+    </a>
+
+    {{-- Workflow --}}
+    <div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
+        Workflow
+    </div>
+
+    <a
+        href="#"
+        class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
+    >
+        Discrepancy & Mismatch Queue
+    </a>
+
+    <a
+        href="#"
+        class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
+    >
+        Workflow History
+    </a>
+
+</nav>
+
+<div class="border-t border-slate-800 p-4">
+
+    <div class="mb-4 px-2">
+        <p class="text-sm font-medium text-white">
+            {{ auth()->user()->name }}
+        </p>
+
+        <p class="truncate text-xs text-slate-400">
+            {{ auth()->user()->email }}
+        </p>
+    </div>
+
+    <form method="POST" action="{{ route('logout') }}">
+        @csrf
+
+        <button
+            type="submit"
+            class="w-full rounded-lg border border-slate-800 bg-slate-800 px-4 py-2.5 text-left text-sm text-white transition hover:bg-slate-700"
+        >
+            Sign Out
+        </button>
+    </form>
+
+</div>
