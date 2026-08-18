@@ -187,14 +187,38 @@
 
                             <td class="px-6 py-4 text-right">
 
-                                <a
-                                    href="{{ route('party.nominations.show', $nomination->id) }}"
-                                    class="text-sm font-semibold text-emerald-700 hover:text-emerald-900"
-                                >
-                                    View
-                                </a>
+    <div class="flex items-center justify-end gap-4">
 
-                            </td>
+        <a
+            href="{{ route('party.nominations.show', $nomination->id) }}"
+            class="text-sm font-semibold text-emerald-700 hover:text-emerald-900"
+        >
+            View
+        </a>
+
+        @if ($nomination->canBeDeleted())
+
+            <form
+                method="POST"
+                action="{{ route('party.nominations.destroy', $nomination->id) }}"
+                onsubmit="return confirm('Remove this candidate nomination? This action cannot be undone.');"
+            >
+                @csrf
+                @method('DELETE')
+
+                <button
+                    type="submit"
+                    class="text-sm font-semibold text-red-600 hover:text-red-800"
+                >
+                    Delete
+                </button>
+            </form>
+
+        @endif
+
+    </div>
+
+</td>
 
                         </tr>
 

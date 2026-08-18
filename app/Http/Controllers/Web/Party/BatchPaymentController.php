@@ -96,10 +96,17 @@ public function pay(
 ) {
 
     abort_if(
-        $batchPayment->status === BatchPayment::STATUS_PAID,
-        403,
-        'This payment has already been completed.'
-    );
+    in_array(
+        $batchPayment->status,
+        [
+            BatchPayment::STATUS_PAID,
+            BatchPayment::STATUS_CONFIRMED,
+        ],
+        true
+    ),
+    403,
+    'This payment has already been completed.'
+);
 
     $party = $this->currentParty($request);
 

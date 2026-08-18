@@ -421,7 +421,79 @@
 
 </div>
 
+{{-- Document Corrections Required --}}
 
+@if ($nomination->documentReviewRequests->where('status','requested')->isNotEmpty())
+
+<div class="mb-6 rounded-xl bg-amber-50 p-6 ring-1 ring-amber-200">
+
+    <h2 class="text-lg font-semibold text-amber-900">
+        Document Corrections Required
+    </h2>
+
+    <p class="mt-1 text-sm text-amber-700">
+        OGSIEC has requested corrections to the following documents.
+    </p>
+
+    <div class="mt-4 space-y-3">
+
+        @foreach(
+            $nomination->documentReviewRequests
+            ->where('status','requested')
+            as $request
+        )
+
+            <div class="rounded-lg bg-white p-4">
+
+                <p class="font-medium text-slate-900">
+                    {{ $request->candidateDocument->documentType->name }}
+                </p>
+
+                <p class="mt-2 text-sm text-slate-600">
+                    {{ $request->reason }}
+                </p>
+<form
+    method="POST"
+    action="{{ route('party.candidates.documents.store', $nomination->candidate) }}"
+    enctype="multipart/form-data"
+    class="mt-4"
+>
+    @csrf
+
+    <input
+        type="hidden"
+        name="document_type_id"
+        value="{{ $request->candidateDocument->document_type_id }}"
+    >
+
+    <label class="block text-sm font-medium text-slate-700">
+        Upload corrected document
+    </label>
+
+    <input
+        type="file"
+        name="document"
+        required
+        class="mt-2 block w-full text-sm"
+    >
+
+    <button
+        type="submit"
+        class="mt-3 rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white"
+    >
+        Upload Correction
+    </button>
+
+</form>
+            </div>
+
+        @endforeach
+
+    </div>
+
+</div>
+
+@endif
 {{-- Political Party --}}
 <div class="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
 
@@ -680,7 +752,7 @@
 
         @endif
 
-      @if ($nomination->isReady())
+      @if ($nomination->canBeWithdrawn())
 
             <a
                 href="{{ route('party.withdrawals.create', $nomination) }}"

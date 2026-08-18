@@ -1,4 +1,4 @@
-@'
+
 @extends('layouts.staff')
 
 @section('content')
@@ -81,6 +81,111 @@
         </div>
 
     </div>
+</div>
+{{-- Resubmission Notice --}}
+@if(
+    $nomination->workflowHistories
+        ->where('action', 'resubmitted')
+        ->isNotEmpty()
+)
+
+<div class="mb-6 rounded-xl border border-blue-200 bg-blue-50 p-6">
+
+    <h2 class="text-lg font-semibold text-blue-900">
+        Documents Corrected and Resubmitted
+    </h2>
+
+    <p class="mt-2 text-sm text-blue-800">
+        This nomination was previously returned to the party and has been resubmitted after document corrections.
+    </p>
+
+
+    @php
+        $resubmission = $nomination->workflowHistories
+            ->where('action', 'resubmitted')
+            ->first();
+    @endphp
+
+
+    <p class="mt-3 text-xs text-blue-700">
+        Resubmitted:
+        {{ $resubmission->created_at?->format('d M Y, H:i') }}
+    </p>
+
+</div>
+
+@endif
+{{-- Required documents --}}
+<div class="mb-6 rounded-xl bg-white p-6 shadow-sm ring-1 ring-slate-200">
+
+    <div class="mb-5">
+        <h2 class="text-lg font-semibold text-slate-900">
+            Required Documents
+        </h2>
+
+        <p class="mt-1 text-sm text-slate-500">
+            Documents required for this candidate's nomination.
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+
+    @forelse ($requiredDocuments as $documentType)
+
+            @php
+                $document = $documentType->candidateDocuments->first();
+            @endphp
+
+<div class="rounded-lg border border-slate-200 bg-white p-4">
+
+    <div class="flex items-start gap-3">
+
+        @if ($document)
+            <input
+                type="checkbox"
+                name="issue_documents[]"
+                value="{{ $documentType->id }}"
+                class="mt-1 rounded border-slate-300 text-amber-600"
+            >
+        @endif
+
+        <div>
+            <p class="text-sm font-medium text-slate-900">
+                {{ $documentType->name }}
+            </p>
+
+            @if ($documentType->description)
+                <p class="mt-1 text-xs text-slate-500">
+                    {{ $documentType->description }}
+                </p>
+            @endif
+        </div>
+
+    </div>
+
+
+    @if ($document)
+        <span class="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+            Submitted
+        </span>
+    @else
+        <span class="inline-flex rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">
+            Missing
+        </span>
+    @endif
+
+</div>
+
+        @empty
+
+            <p class="py-4 text-sm text-slate-500">
+                No required documents have been configured.
+            </p>
+
+        @endforelse
+
+    </div>
+
 </div>
 
 {{-- Screening history --}}
@@ -224,10 +329,11 @@
 
         {{-- Return --}}
         <form
-            method="POST"
-            action="{{ route('staff.commissioner.nominations.return', $nomination) }}"
-            class="rounded-xl border border-amber-200 bg-amber-50 p-5"
-        >
+    id="returnNominationForm"
+    method="POST"
+    action="{{ route('staff.commissioner.nominations.return', $nomination) }}"
+    class="rounded-xl border border-amber-200 bg-amber-50 p-5"
+>
             @csrf
 
             <h3 class="font-semibold text-amber-900">
@@ -274,5 +380,26 @@
     </div>
 
 </div>
+<script>
+document
+    .getElementById('returnNominationForm')
+    .addEventListener('submit', function () {
 
+        document
+            .querySelectorAll('input[name="issue_documents[]"]:checked')
+            .forEach(function (checkbox) {
+
+                let hidden = document.createElement('input');
+
+                hidden.type = 'hidden';
+                hidden.name = 'issue_documents[]';
+                hidden.value = checkbox.value;
+
+                document
+                    .getElementById('returnNominationForm')
+                    .appendChild(hidden);
+            });
+
+    });
+</script>
 @endsection

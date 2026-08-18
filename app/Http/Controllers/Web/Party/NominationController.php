@@ -53,7 +53,7 @@ public function show(
 
     $nomination = \App\Models\Nomination\Nomination::query()
         ->where('political_party_id', $party->id)
-        ->with([
+      ->with([
     'candidate',
     'election',
     'position',
@@ -61,6 +61,7 @@ public function show(
     'ward',
     'lcda',
     'withdrawal',
+    'documentReviewRequests.candidateDocument.documentType',
 ])
         ->findOrFail($nomination);
 
@@ -240,6 +241,37 @@ public function update(
             'Candidate nomination updated successfully.'
         );
 }
+
+public function destroy(
+    Request $request,
+    int $nomination
+): RedirectResponse {
+
+    $party = $this->currentParty($request);
+
+    $nomination = Nomination::query()
+        ->where('political_party_id', $party->id)
+        ->with('withdrawal')
+        ->findOrFail($nomination);
+
+    abort_unless(
+        $nomination->canBeDeleted(),
+        403,
+        'This nomination can no longer be removed directly.'
+    );
+
+    $this->nominationService->deleteForParty(
+        $nomination,
+        $party->id
+    );
+
+    return redirect()
+        ->route('party.nominations.index')
+        ->with(
+            'success',
+            'Candidate nomination removed successfully.'
+        );
+}
 public function markReady(
     Request $request,
     int $nomination
@@ -355,4 +387,5 @@ private function currentParty(Request $request)
         ->where('political_parties.is_active', true)
         ->firstOrFail();
 }
+
 }

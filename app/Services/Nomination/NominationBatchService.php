@@ -69,7 +69,79 @@ class NominationBatchService
         });
 
     }
+public function refreshBatchTotals(
+    NominationBatch $batch
+): ?NominationBatch {
 
+    return DB::transaction(function () use ($batch) {
+
+        $nominations = $batch->nominations()
+            ->whereNotIn('status', [
+                Nomination::STATUS_WITHDRAWN,
+                Nomination::STATUS_REPLACED,
+            ])
+            ->get();
+
+        /*
+         |--------------------------------------------------------------------------
+         | Empty draft batch
+         |--------------------------------------------------------------------------
+         |
+         | Once the last nomination has been removed,
+         | there is no reason to keep the batch.
+         |
+         | Deleting the batch will also delete its
+         | associated pending payment because the
+         | batch_payments foreign key uses cascadeOnDelete().
+         |
+         */
+
+        if ($nominations->isEmpty()) {
+
+            if ($batch->status !== NominationBatch::STATUS_DRAFT) {
+                throw new \RuntimeException(
+                    'A non-draft nomination batch cannot be emptied.'
+                );
+            }
+
+            $batch->delete();
+
+            return null;
+        }
+
+        /*
+         |--------------------------------------------------------------------------
+         | Recalculate batch totals
+         |--------------------------------------------------------------------------
+         */
+
+        $candidateCount = $nominations->count();
+
+        $totalFee = $this->calculateFee($nominations);
+
+        $batch->update([
+            'candidate_count' => $candidateCount,
+            'total_nomination_fee' => $totalFee,
+        ]);
+
+        /*
+         |--------------------------------------------------------------------------
+         | Synchronize pending payment
+         |--------------------------------------------------------------------------
+         */
+
+        if ($batch->payment) {
+            $batch->payment->update([
+                'amount' => $totalFee,
+            ]);
+        }
+
+        return $batch->fresh([
+            'payment',
+            'nominations',
+        ]);
+    });
+}
     /**
      * Generate batch number.
      */

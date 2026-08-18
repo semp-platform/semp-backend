@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 use App\Models\Nomination\Nomination;
 use Illuminate\Support\Facades\Storage;
-
+use App\Models\Candidate\CandidateDocumentReviewRequest;
 
 
 class CandidateDocumentController extends Controller
@@ -137,16 +137,52 @@ class CandidateDocumentController extends Controller
             $validated['document_type_id']
         );
 
-        $this->documents->upload(
+        $uploadedDocument = $this->documents->upload(
 
-            $candidate,
+    $candidate,
 
-            $documentType,
+    $documentType,
 
-            $validated['document']
+    $validated['document']
 
-        );
+);
 
+
+CandidateDocumentReviewRequest::query()
+    ->where('candidate_id', $candidate->id)
+    ->where('candidate_document_id', $uploadedDocument->id)
+    ->where(
+        'status',
+        CandidateDocumentReviewRequest::STATUS_REQUESTED
+    )
+    ->update([
+        'status' => CandidateDocumentReviewRequest::STATUS_RESOLVED,
+        'resolved_at' => now(),
+        'resolved_by' => auth()->id(),
+    ]);
+$nomination = $candidate->nomination;
+
+if ($nomination) {
+
+    $pendingCorrections = CandidateDocumentReviewRequest::query()
+        ->where('nomination_id', $nomination->id)
+        ->where(
+            'status',
+            CandidateDocumentReviewRequest::STATUS_REQUESTED
+        )
+        ->exists();
+
+
+    if (! $pendingCorrections) {
+
+        app(\App\Services\Workflow\NominationWorkflowService::class)
+            ->resubmitAfterCorrection(
+                $nomination
+            );
+
+    }
+
+}
         return back()->with(
 
             'success',

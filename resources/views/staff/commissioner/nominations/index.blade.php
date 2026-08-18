@@ -110,8 +110,20 @@
 
                                 <td class="whitespace-nowrap px-6 py-4">
                                     <div class="font-medium text-slate-900">
-                                        {{ $nomination->candidate_name }}
-                                    </div>
+    {{ $nomination->candidate_name }}
+</div>
+
+@if(
+    $nomination->workflowHistories
+        ->where('action', 'resubmitted')
+        ->isNotEmpty()
+)
+
+<span class="mt-1 inline-flex rounded-full bg-blue-100 px-2 py-1 text-xs font-semibold text-blue-700">
+    Resubmitted
+</span>
+
+@endif
                                 </td>
 
                                 <td class="whitespace-nowrap px-6 py-4 text-sm text-slate-600">

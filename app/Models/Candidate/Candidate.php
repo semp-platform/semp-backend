@@ -21,7 +21,11 @@ class Candidate extends Model
         'date_of_birth',
         'nin_verified_at',
         'is_active',
-    ];
+        'has_disability',
+        'qualification',
+'qualification_details',
+'disability_description',
+            ];
 
     protected $hidden = [
         'nin_encrypted',
@@ -32,6 +36,7 @@ class Candidate extends Model
         'date_of_birth' => 'date',
         'nin_verified_at' => 'datetime',
         'is_active' => 'boolean',
+        'has_disability' => 'boolean',
     ];
 
     public function getFullNameAttribute(): string

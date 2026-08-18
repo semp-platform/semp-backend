@@ -22,22 +22,26 @@ class FinancePaymentController extends Controller
     /**
      * Display all batch payments.
      */
-    public function index(): View
-    {
-        $payments = BatchPayment::with([
+   public function index(): View
+{
+    $payments = BatchPayment::query()
+        ->with([
             'politicalParty',
             'batch.election',
             'confirmedBy',
         ])
-            ->latest()
-            ->get();
+        ->whereIn('status', [
+            BatchPayment::STATUS_PAID,
+            BatchPayment::STATUS_CONFIRMED,
+        ])
+        ->latest()
+        ->get();
 
-        return view(
-            'finance.payments.index',
-            compact('payments')
-        );
-    }
-
+    return view(
+        'finance.payments.index',
+        compact('payments')
+    );
+}
     /**
      * Confirm a payment.
      */

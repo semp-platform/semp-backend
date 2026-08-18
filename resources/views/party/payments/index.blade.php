@@ -162,28 +162,59 @@
 
                         </td>
 
-                        <td class="px-6 py-4 text-center">
+                  <td class="px-6 py-4 text-center">
 
-                            <a
-                                href="{{ route('party.payments.show', $payment) }}"
-                                class="inline-flex rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
-                            >
-                                @if($payment->status === \App\Models\Payment\BatchPayment::STATUS_PENDING)
+    @if ($payment->status === \App\Models\Payment\BatchPayment::STATUS_PENDING)
 
-    Review & Pay
+        <a
+            href="{{ route('party.payments.show', $payment) }}"
+            class="inline-flex rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+        >
+            Review & Pay
+        </a>
 
-@elseif($payment->status === \App\Models\Payment\BatchPayment::STATUS_PAID)
+    @elseif ($payment->status === \App\Models\Payment\BatchPayment::STATUS_PAID)
 
-    View Payment
+        <a
+            href="{{ route('party.payments.show', $payment) }}"
+            class="inline-flex rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-100"
+        >
+            Awaiting Confirmation
+        </a>
 
-@else
+    @elseif ($payment->status === \App\Models\Payment\BatchPayment::STATUS_CONFIRMED)
 
-    Retry Payment
+    <a
+        href="{{ route('party.payments.show', $payment) }}"
+        class="inline-flex rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+    >
+        View Payment
+    </a>
 
-@endif
-                            </a>
+    @elseif (
+        $payment->status === \App\Models\Payment\BatchPayment::STATUS_FAILED
+        || $payment->status === \App\Models\Payment\BatchPayment::STATUS_CANCELLED
+    )
 
-                        </td>
+        <a
+            href="{{ route('party.payments.show', $payment) }}"
+            class="inline-flex rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-700"
+        >
+            Retry Payment
+        </a>
+
+    @else
+
+        <a
+            href="{{ route('party.payments.show', $payment) }}"
+            class="inline-flex rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+        >
+            View Payment
+        </a>
+
+    @endif
+
+</td>
 
                     </tr>
 

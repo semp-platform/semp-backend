@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>@yield('title', 'Party Portal | SEMP')</title>
 
@@ -11,16 +12,26 @@
 
 <body class="bg-slate-50 text-slate-900">
 
-<div class="min-h-screen lg:flex">
-
+<div
+    class="min-h-screen lg:flex"
+    x-data="{ mobileSidebarOpen: false }"
+>
     @include('layouts.partials.party.sidebar')
 
     <div class="min-w-0 flex-1">
 
         <header class="border-b border-slate-200 bg-white">
 
-            <div class="flex h-16 items-center justify-between px-6 lg:px-8">
-
+<div class="flex h-16 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+    {{-- Mobile menu --}}
+<button
+    type="button"
+    @click="mobileSidebarOpen = true"
+    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-lg text-slate-700 shadow-sm lg:hidden"
+    aria-label="Open navigation"
+>
+    ☰
+</button>
                 <div>
                     <p class="text-sm font-semibold text-slate-900">
                         {{ $party->name }}

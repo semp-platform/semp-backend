@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Reference\Lga;
 use App\Models\Reference\Ward;
 use App\Models\Reference\Lcda;
+use App\Models\ElectionResult;
 
 use App\Models\Nomination\Nomination;
 
@@ -75,5 +76,9 @@ public function lcda(): BelongsTo
 public function nominations(): HasMany
 {
     return $this->hasMany(Nomination::class);
+}
+public function results(): HasMany
+{
+    return $this->hasMany(ElectionResult::class);
 }
 }

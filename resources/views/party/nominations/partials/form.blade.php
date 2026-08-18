@@ -324,6 +324,125 @@
 </div>
 
 @endif
+{{-- Candidate supplementary information --}}
+<section
+    id="candidate-information-section"
+    class="mt-6 rounded-xl border border-slate-200 bg-white shadow-sm"
+>
+    <div class="border-b border-slate-200 px-6 py-5">
+        <h2 class="font-semibold text-slate-900">
+            Candidate Information
+        </h2>
+
+        <p class="mt-1 text-sm text-slate-500">
+            Provide the candidate's qualification and disability information.
+        </p>
+    </div>
+
+    <div class="grid gap-6 p-6 sm:grid-cols-2">
+
+        {{-- Qualification --}}
+        <div>
+            <label
+                for="qualification"
+                class="block text-sm font-medium text-slate-700"
+            "
+            >
+                Qualification
+            </label>
+
+            <input
+                type="text"
+                name="qualification"
+                id="qualification"
+                value="{{ old('qualification', $nomination->candidate?->qualification ?? '') }}"
+                class="mt-2 block w-full rounded-lg border border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500"
+                placeholder="e.g. B.Sc. Computer Science"
+            >
+
+            @error('qualification')
+                <p class="mt-1 text-sm text-red-600">
+                    {{ $message }}
+                </p>
+            @enderror
+        </div>
+
+        {{-- Qualification details --}}
+        <div>
+            <label
+                for="qualification_details"
+                class="block text-sm font-medium text-slate-700"
+
+            >
+                Qualification Details
+            </label>
+
+            <textarea
+                name="qualification_details"
+                id="qualification_details"
+                rows="3"
+                class="mt-2 block w-full rounded-lg border border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500"
+                placeholder="Institution, course, year or other relevant details"
+            >{{ old('qualification_details', $nomination->candidate?->qualification_details ?? '') }}</textarea>
+
+            @error('qualification_details')
+                <p class="mt-1 text-sm text-red-600">
+                    {{ $message }}
+                </p>
+            @enderror
+        </div>
+
+        {{-- Disability --}}
+        <div>
+            <label
+                for="has_disability"
+                class="block text-sm font-medium text-slate-700"
+            >
+                Does the candidate have a disability?
+            </label>
+
+            <select
+                name="has_disability"
+                id="has_disability"
+                class="mt-2 block w-full rounded-lg border border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500"
+            >
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+            </select>
+
+            @error('has_disability')
+                <p class="mt-1 text-sm text-red-600">
+                    {{ $message }}
+                </p>
+            @enderror
+        </div>
+
+        {{-- Disability description --}}
+        <div>
+            <label
+                for="disability_description"
+                class="block text-sm font-medium text-slate-700"
+            >
+                Disability Description
+            </label>
+
+            <textarea
+                name="disability_description"
+                id="disability_description"
+                rows="3"
+                class="mt-2 block w-full rounded-lg border border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500"
+                placeholder="Provide a brief description"
+            ></textarea>
+
+            @error('disability_description')
+                <p class="mt-1 text-sm text-red-600">
+                    {{ $message }}
+                </p>
+            @enderror
+        </div>
+
+    </div>
+</section>
 
         {{-- Electoral area --}}
         <section
@@ -934,6 +1053,7 @@ const candidateDateOfBirth =
     );
 
 let verifiedNin = null;
+
 
 
 function resetCandidateVerification() {

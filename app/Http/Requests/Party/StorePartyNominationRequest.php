@@ -35,18 +35,55 @@ class StorePartyNominationRequest extends FormRequest
                 'regex:/^\d{11}$/',
             ],
 
+            /*
+            |--------------------------------------------------------------------------
+            | Candidate supplementary information
+            |--------------------------------------------------------------------------
+            */
+
+            'qualification' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'qualification_details' => [
+                'nullable',
+                'string',
+                'max:5000',
+            ],
+
+            'has_disability' => [
+                'required',
+                'boolean',
+            ],
+
+            'disability_description' => [
+                'nullable',
+                'string',
+                'max:5000',
+                'required_if:has_disability,1',
+            ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | Electoral location
+            |--------------------------------------------------------------------------
+            */
+
             'lga_id' => [
                 'nullable',
                 'integer',
                 Rule::exists('lgas', 'id')
                     ->where('is_active', true),
             ],
+
             'lcda_id' => [
-    'nullable',
-    'integer',
-    Rule::exists('lcdas', 'id')
-        ->where('is_active', true),
-],
+                'nullable',
+                'integer',
+                Rule::exists('lcdas', 'id')
+                    ->where('is_active', true),
+            ],
 
             'ward_id' => [
                 'nullable',

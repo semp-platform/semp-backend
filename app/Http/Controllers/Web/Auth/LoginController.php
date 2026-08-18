@@ -81,7 +81,7 @@ class LoginController extends Controller
         |     ↓
         | staff.legal.nominations.index
         |
-        | Approving Officer
+        | Commissioner
         |     ↓
         | staff.commissioner.nominations.index
         |

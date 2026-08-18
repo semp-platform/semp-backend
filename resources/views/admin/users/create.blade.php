@@ -63,7 +63,33 @@
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
         </div>
+<div>
+    <label class="mb-2 block text-sm font-medium">
+        Political Party
+    </label>
 
+    <select
+        name="political_party_id"
+        class="w-full rounded-lg border-slate-300"
+    >
+        <option value="">Select Political Party</option>
+
+        @foreach($politicalParties as $party)
+            <option
+                value="{{ $party->id }}"
+                @selected(old('political_party_id') == $party->id)
+            >
+                {{ $party->name }} ({{ $party->acronym }})
+            </option>
+        @endforeach
+    </select>
+
+    @error('political_party_id')
+        <p class="mt-1 text-sm text-red-600">
+            {{ $message }}
+        </p>
+    @enderror
+</div>
         <div>
             <label class="mb-2 block text-sm font-medium">Password</label>
 

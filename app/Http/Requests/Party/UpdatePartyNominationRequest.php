@@ -29,6 +29,42 @@ class UpdatePartyNominationRequest extends FormRequest
                     ->where('is_active', true),
             ],
 
+            /*
+            |--------------------------------------------------------------------------
+            | Candidate supplementary information
+            |--------------------------------------------------------------------------
+            */
+
+            'qualification' => [
+                'nullable',
+                'string',
+                'max:255',
+            ],
+
+            'qualification_details' => [
+                'nullable',
+                'string',
+                'max:5000',
+            ],
+
+            'has_disability' => [
+                'required',
+                'boolean',
+            ],
+
+            'disability_description' => [
+                'nullable',
+                'string',
+                'max:5000',
+                'required_if:has_disability,1',
+            ],
+
+            /*
+            |--------------------------------------------------------------------------
+            | Electoral location
+            |--------------------------------------------------------------------------
+            */
+
             'lga_id' => [
                 'nullable',
                 'integer',
@@ -42,6 +78,7 @@ class UpdatePartyNominationRequest extends FormRequest
                 Rule::exists('wards', 'id')
                     ->where('is_active', true),
             ],
+
             'lcda_id' => [
                 'nullable',
                 'integer',

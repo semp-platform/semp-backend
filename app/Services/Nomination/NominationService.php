@@ -10,6 +10,8 @@ use App\Models\Reference\Ward;
 use App\Services\Candidate\CandidateService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use App\Models\Nomination\NominationBatch;
+use App\Services\Nomination\NominationBatchService;
 
 class NominationService
 {
@@ -54,6 +56,12 @@ class NominationService
                 ->findOrCreateFromNin(
                     $data['nin']
                 );
+                $candidate->update([
+    'qualification' => $data['qualification'] ?? null,
+    'qualification_details' => $data['qualification_details'] ?? null,
+    'has_disability' => $data['has_disability'] ?? false,
+    'disability_description' => $data['disability_description'] ?? null,
+]);
 
             /*
              * Prevent duplicate nominations.
@@ -202,7 +210,12 @@ class NominationService
             $position,
             $nomination
         );
-
+$nomination->candidate()->update([
+    'qualification' => $data['qualification'] ?? null,
+    'qualification_details' => $data['qualification_details'] ?? null,
+    'has_disability' => $data['has_disability'] ?? false,
+    'disability_description' => $data['disability_description'] ?? null,
+]);
         $nomination->update([
 
             'election_id' => $election->id,
@@ -263,6 +276,109 @@ public function markReadyForParty(
     ]);
 
     return $nomination->fresh();
+}
+
+
+public function deleteForParty(
+    Nomination $nomination,
+    int $politicalPartyId
+): void {
+
+    DB::transaction(function () use (
+        $nomination,
+        $politicalPartyId
+    ) {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Security check
+        |--------------------------------------------------------------------------
+        */
+
+        if ($nomination->political_party_id !== $politicalPartyId) {
+            abort(404);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Only nominations still under party control
+        | may be deleted directly.
+        |--------------------------------------------------------------------------
+        */
+
+        if (! $nomination->canBeDeleted()) {
+            throw ValidationException::withMessages([
+                'nomination' =>
+                    'This nomination can no longer be removed directly.',
+            ]);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | A nomination with a withdrawal request
+        | cannot be deleted directly.
+        |--------------------------------------------------------------------------
+        */
+
+        if ($nomination->hasWithdrawal()) {
+            throw ValidationException::withMessages([
+                'nomination' =>
+                    'This nomination has a withdrawal request and cannot be deleted directly.',
+            ]);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Remember the batch.
+        |--------------------------------------------------------------------------
+        */
+
+        $batch = null;
+
+        if ($nomination->nomination_batch_id) {
+
+            $batch = NominationBatch::query()
+                ->with('payment')
+                ->find($nomination->nomination_batch_id);
+
+            /*
+             * Only draft batches remain under party control.
+             */
+            if (
+                $batch &&
+                $batch->status !== NominationBatch::STATUS_DRAFT
+            ) {
+                throw ValidationException::withMessages([
+                    'nomination' =>
+                        'This nomination belongs to a batch that has already left the party draft stage.',
+                ]);
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Delete the nomination.
+        |
+        | The candidate record itself remains.
+        |--------------------------------------------------------------------------
+        */
+
+        $nomination->delete();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Refresh the batch.
+        |
+        | If this was the last nomination, the batch service
+        | will delete the empty draft batch and its payment.
+        |--------------------------------------------------------------------------
+        */
+
+        if ($batch) {
+            app(NominationBatchService::class)
+                ->refreshBatchTotals($batch);
+        }
+    });
 }
 
 private function loadElection(int $electionId): Election
@@ -443,4 +559,5 @@ private function ensureCandidateNotAlreadyNominated(
 
     }
 }
+
 }

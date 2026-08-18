@@ -11,8 +11,10 @@
     'resources/js/app.js'
 ])
 
-<div class="flex min-h-screen bg-slate-100">
-
+<div
+    class="flex min-h-screen bg-slate-100"
+    x-data="{ mobileSidebarOpen: false }"
+>
     @include('components.staff.sidebar')
 
     <div class="flex min-h-screen flex-1 flex-col">

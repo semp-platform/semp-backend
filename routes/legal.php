@@ -34,4 +34,38 @@ Route::prefix('legal')
         )
             ->middleware('permission:legal.review')
             ->name('nominations.forward');
+
+                    /*
+        |--------------------------------------------------------------------------
+        | Shared Legal Documents
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/documents',
+            [\App\Http\Controllers\Web\Legal\LegalDocumentController::class, 'index']
+        )
+            ->middleware('permission:legal.view')
+            ->name('documents.index');
+
+        Route::post(
+            '/documents',
+            [\App\Http\Controllers\Web\Legal\LegalDocumentController::class, 'store']
+        )
+            ->middleware('permission:legal.review')
+            ->name('documents.store');
+
+        Route::get(
+            '/documents/{legalDocument}/view',
+            [\App\Http\Controllers\Web\Legal\LegalDocumentController::class, 'view']
+        )
+            ->middleware('permission:legal.view')
+            ->name('documents.view');
+
+        Route::get(
+            '/documents/{legalDocument}/download',
+            [\App\Http\Controllers\Web\Legal\LegalDocumentController::class, 'download']
+        )
+            ->middleware('permission:legal.view')
+            ->name('documents.download');
     });

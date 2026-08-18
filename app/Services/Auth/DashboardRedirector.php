@@ -64,14 +64,14 @@ class DashboardRedirector
         }
 
         /*
-        |--------------------------------------------------------------------------
-        | Commissioner / Approving Officer
-        |--------------------------------------------------------------------------
-        */
+|--------------------------------------------------------------------------
+| Commissioner
+|--------------------------------------------------------------------------
+*/
 
-        if ($user->hasRole('Approving Officer')) {
-            return 'staff.commissioner.nominations.index';
-        }
+if ($user->hasRole('Commissioner')) {
+    return 'staff.commissioner.nominations.index';
+}
 
         /*
         |--------------------------------------------------------------------------

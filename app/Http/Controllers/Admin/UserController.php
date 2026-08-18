@@ -3,10 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Services\Administration\UserService;
 use App\Http\Requests\Admin\StoreUserRequest;
 use App\Http\Requests\Admin\UpdateUserRequest;
+use App\Models\Party\PoliticalParty;
 use App\Models\User;
+use App\Services\Administration\UserService;
 
 class UserController extends Controller
 {
@@ -25,6 +26,9 @@ class UserController extends Controller
     {
         return view('admin.users.create', [
             'roles' => $this->userService->roles(),
+            'politicalParties' => PoliticalParty::where('is_active', true)
+                ->orderBy('name')
+                ->get(),
         ]);
     }
 
@@ -42,6 +46,9 @@ class UserController extends Controller
         return view('admin.users.edit', [
             'user' => $user,
             'roles' => $this->userService->roles(),
+            'politicalParties' => PoliticalParty::where('is_active', true)
+                ->orderBy('name')
+                ->get(),
         ]);
     }
 

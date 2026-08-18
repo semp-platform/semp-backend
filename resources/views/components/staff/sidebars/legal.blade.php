@@ -31,16 +31,23 @@
     </a>
 
     {{-- Legal Review --}}
-    <div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
-        Legal Review
-    </div>
+<div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
+    Legal Review
+</div>
 
-    <a
-        href="#"
-        class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
-    >
-        Legal Review
-    </a>
+<a
+    href="#"
+    class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
+>
+    Legal Review
+</a>
+
+<a
+    href="{{ route('staff.legal.documents.index') }}"
+    class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
+>
+    Court Orders & Injunctions
+</a>
 
     {{-- Candidate Records --}}
     <div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">

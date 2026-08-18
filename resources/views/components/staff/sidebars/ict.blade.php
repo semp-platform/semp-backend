@@ -57,11 +57,37 @@
     </div>
 
     <a
-        href="#"
-        class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
-    >
-        Publication & Release
-    </a>
+    href="{{ route('web.public-content.index') }}"
+    class="block rounded-lg px-4 py-3 text-sm text-white hover:bg-slate-800"
+>
+    Publication & Release
+</a>
+
+{{-- Results --}}
+<div class="px-2 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
+    Results
+</div>
+
+<a
+    href="{{ route('staff.ict.results.index') }}"
+    class="block rounded-lg px-4 py-3 text-sm text-white hover:bg-slate-800"
+>
+    Results Management
+</a>
+
+<a
+    href="{{ route('staff.ict.results.create') }}"
+    class="block rounded-lg px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
+>
+    Upload Results
+</a>
+
+<a
+    href="{{ route('staff.ict.results.index') }}"
+    class="block rounded-lg px-4 py-2 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
+>
+    Imported Results
+</a>
 
 
     <div class="px-2 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">

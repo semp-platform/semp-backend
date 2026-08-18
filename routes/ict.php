@@ -1,8 +1,9 @@
 <?php
 
 use App\Http\Controllers\Web\Nomination\IctNominationController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\Party\CandidateDocumentController;
+use App\Http\Controllers\Web\Results\IctResultController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,7 +25,6 @@ Route::prefix('ict')
             '/nomination-batches',
             [IctNominationController::class, 'batches']
         )
-
             ->name('nomination-batches.index');
 
         /*
@@ -53,18 +53,18 @@ Route::prefix('ict')
             ->middleware('permission:nominations.review')
             ->name('nomination-batches.receive');
 
-            /*
-|--------------------------------------------------------------------------
-| View Candidate Document
-|--------------------------------------------------------------------------
-*/
+        /*
+        |--------------------------------------------------------------------------
+        | View Candidate Document
+        |--------------------------------------------------------------------------
+        */
 
-Route::get(
-    '/candidate-documents/{document}/view',
-    [CandidateDocumentController::class, 'view']
-)
-    ->middleware('permission:nominations.view')
-    ->name('candidate-documents.view');
+        Route::get(
+            '/candidate-documents/{document}/view',
+            [CandidateDocumentController::class, 'view']
+        )
+            ->middleware('permission:nominations.view')
+            ->name('candidate-documents.view');
 
         /*
         |--------------------------------------------------------------------------
@@ -81,7 +81,7 @@ Route::get(
 
         /*
         |--------------------------------------------------------------------------
-        | Forward
+        | Forward Nomination
         |--------------------------------------------------------------------------
         */
 
@@ -94,19 +94,69 @@ Route::get(
 
         /*
         |--------------------------------------------------------------------------
+        | Nominations Currently With ICT
+        |--------------------------------------------------------------------------
+        */
 
-        |--------------------------------------------------------------------
-|--------------------------------------------------------------------------
-| Nominations Currently With ICT
-|--------------------------------------------------------------------------
-*/
+        Route::get(
+            '/nominations',
+            [IctNominationController::class, 'index']
+        )
+            ->middleware('permission:nominations.view')
+            ->name('nominations.index');
 
-Route::get(
-    '/nominations',
-    [IctNominationController::class, 'index']
+        /*
+        |--------------------------------------------------------------------------
+        | Election Results
+        |--------------------------------------------------------------------------
+        */
+
+        Route::get(
+            '/results',
+            [IctResultController::class, 'index']
+        )
+            ->middleware('permission:results.manage')
+            ->name('results.index');
+
+        Route::get(
+            '/results/create',
+            [IctResultController::class, 'create']
+        )
+            ->middleware('permission:results.manage')
+            ->name('results.create');
+
+        Route::post(
+            '/results/analyse',
+            [IctResultController::class, 'analyse']
+        )
+            ->middleware('permission:results.manage')
+            ->name('results.analyse');
+
+        Route::post(
+            '/results/import',
+            [IctResultController::class, 'import']
+        )
+            ->middleware('permission:results.manage')
+            ->name('results.import');
+
+            Route::post(
+    '/results/{resultImport}/publish',
+    [IctResultController::class, 'publish']
 )
-    ->middleware('permission:nominations.view')
-    ->name('nominations.index');
+    ->middleware('permission:results.manage')
+    ->name('results.publish');
 
+        Route::get(
+            '/results/{resultImport}',
+            [IctResultController::class, 'show']
+        )
+            ->middleware('permission:results.manage')
+            ->name('results.show');
 
+        Route::get(
+            '/results/{resultImport}/ward/{ward}',
+            [IctResultController::class, 'ward']
+        )
+            ->middleware('permission:results.manage')
+            ->name('results.ward');
     });

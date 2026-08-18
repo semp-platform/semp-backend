@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Web\Election\ElectionController;
+use App\Http\Controllers\Web\Public\HomeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -9,39 +10,36 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::get(
-    '/',
-    function () {
-        $user = auth()->user();
+/*
+|--------------------------------------------------------------------------
+| Public Website Homepage
+|--------------------------------------------------------------------------
+|
+| Guests see the public OGSIEC website.
+| Authenticated SEMP users are sent to their appropriate portal.
+|
+*/
 
-        if ($user->hasRole('Political Party Officer')) {
-            return redirect()->route('party.dashboard');
-        }
 
-        if ($user->hasRole('ICT Officer')) {
-            return redirect()->route('staff.ict.nomination-batches.index');
-        }
-
-        if ($user->hasRole('EPM Officer')) {
-            return redirect()->route('staff.epm.nominations.index');
-        }
-
-        if ($user->hasRole('Finance Officer')) {
-            return redirect()->route('finance.dashboard');
-        }
-
-        return redirect()->route('dashboard');
-    }
-)->name('home');
+/*
+|--------------------------------------------------------------------------
+| Authenticated Dashboard
+|--------------------------------------------------------------------------
+*/
 
 Route::get(
     '/dashboard',
     function () {
         return view('dashboard');
     }
-)
-->middleware('permission:elections.view')
-->name('dashboard');
+)->name('dashboard');
+
+
+/*
+|--------------------------------------------------------------------------
+| Staff Election Management
+|--------------------------------------------------------------------------
+*/
 
 Route::get(
     '/elections',

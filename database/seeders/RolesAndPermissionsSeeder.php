@@ -70,8 +70,11 @@ class RolesAndPermissionsSeeder extends Seeder
             'payments.verify',
 
             // Reports and audit
-            'reports.view',
-            'audit.view',
+'reports.view',
+'audit.view',
+
+// Election Results
+'results.manage',
 
             // Department-specific nomination permissions
             'legal.view',
@@ -212,12 +215,14 @@ class RolesAndPermissionsSeeder extends Seeder
         );
 
         $ictOfficer->syncPermissions([
-            'nominations.view',
-            'nominations.review',
+    'nominations.view',
+    'nominations.review',
 
-            'candidates.view',
-            'parties.view',
-        ]);
+    'candidates.view',
+    'parties.view',
+
+    'results.manage',
+]);
 
         /*
         |--------------------------------------------------------------------------
@@ -272,7 +277,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
         /*
         |--------------------------------------------------------------------------
-        | Approving Officer
+        | Commissioner
         |--------------------------------------------------------------------------
         |
         | This role represents the Commissioner / approving authority.
@@ -286,9 +291,9 @@ class RolesAndPermissionsSeeder extends Seeder
         |
         */
 
-        $approvingOfficer = Role::updateOrCreate(
+        $commissioner = Role::updateOrCreate(
             [
-                'name' => 'Approving Officer',
+                'name' => 'Commissioner',
                 'guard_name' => 'web',
             ],
             [
@@ -296,7 +301,7 @@ class RolesAndPermissionsSeeder extends Seeder
             ]
         );
 
-        $approvingOfficer->syncPermissions([
+        $commissioner->syncPermissions([
             'elections.view',
 
             'nominations.view',
