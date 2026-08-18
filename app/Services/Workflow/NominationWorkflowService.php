@@ -3,6 +3,7 @@
 namespace App\Services\Workflow;
 
 use App\Models\Nomination\Nomination;
+use App\Models\Candidate\CandidateDocumentReviewRequest;
 use App\Models\Nomination\NominationBatch;
 use App\Models\Nomination\NominationWorkflowHistory;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +21,7 @@ class NominationWorkflowService
 public const DEPARTMENT_EPM = 'epm';
 public const DEPARTMENT_LEGAL = 'legal';
 public const DEPARTMENT_COMMISSIONER = 'commissioner';
+public const DEPARTMENT_PARTY = 'party';
 
     /*
     |--------------------------------------------------------------------------
@@ -28,9 +30,10 @@ public const DEPARTMENT_COMMISSIONER = 'commissioner';
     */
 
     public const ACTION_RECEIVED = 'received';
-    public const ACTION_FORWARDED = 'forwarded';
-    public const ACTION_RETURNED = 'returned';
-    public const ACTION_APPROVED = 'approved';
+public const ACTION_FORWARDED = 'forwarded';
+public const ACTION_RETURNED = 'returned';
+public const ACTION_RESUBMITTED = 'resubmitted';
+public const ACTION_APPROVED = 'approved';
 
 
 
@@ -166,16 +169,41 @@ public function forwardFromEpm(
      * Commissioner returns nomination to political party.
      */
     public function returnFromCommissioner(
-        Nomination $nomination,
-        string $reason,
-        ?string $comment = null
-    ): NominationWorkflowHistory {
+    Nomination $nomination,
+    string $reason,
+    ?string $comment = null,
+    array $documentIds = []
+): NominationWorkflowHistory {
         $this->ensureCurrentDepartment(
-            $nomination,
-            self::DEPARTMENT_COMMISSIONER
-        );
+    $nomination,
+    self::DEPARTMENT_COMMISSIONER
+);
 
-        return $this->recordMovement(
+if (! empty($documentIds)) {
+
+    $documents = $nomination->candidate
+        ->documents()
+        ->whereIn('id', $documentIds)
+        ->get();
+
+    foreach ($documents as $document) {
+
+        CandidateDocumentReviewRequest::create([
+            'nomination_id' => $nomination->id,
+            'candidate_id' => $nomination->candidate_id,
+            'candidate_document_id' => $document->id,
+            'requested_by' => auth()->id(),
+            'department' => self::DEPARTMENT_COMMISSIONER,
+            'reason' => $reason,
+            'comment' => $comment,
+            'status' => CandidateDocumentReviewRequest::STATUS_REQUESTED,
+            'requested_at' => now(),
+        ]);
+
+    }
+}
+
+return $this->recordMovement(
             nomination: $nomination,
             fromDepartment: self::DEPARTMENT_COMMISSIONER,
             toDepartment: null,
@@ -185,6 +213,21 @@ public function forwardFromEpm(
         );
     }
 
+    /**
+ * Party resubmits nomination after document corrections.
+ */
+public function resubmitAfterCorrection(
+    Nomination $nomination
+): NominationWorkflowHistory {
+
+    return $this->recordMovement(
+        nomination: $nomination,
+        fromDepartment: self::DEPARTMENT_PARTY,
+        toDepartment: self::DEPARTMENT_COMMISSIONER,
+        action: self::ACTION_RESUBMITTED,
+        comment: 'Documents corrected and nomination resubmitted.',
+    );
+}
     /**
      * Commissioner approves nomination.
      */
@@ -270,9 +313,10 @@ public function forwardFromEpm(
 {
     return match ($action) {
 
-        self::ACTION_RECEIVED,
-        self::ACTION_FORWARDED
-            => Nomination::STATUS_UNDER_REVIEW,
+      self::ACTION_RECEIVED,
+self::ACTION_FORWARDED,
+self::ACTION_RESUBMITTED
+    => Nomination::STATUS_UNDER_REVIEW,
 
         self::ACTION_APPROVED
             => Nomination::STATUS_APPROVED,
@@ -293,8 +337,9 @@ public function forwardFromEpm(
     return match ($action) {
 
         self::ACTION_RECEIVED,
-        self::ACTION_FORWARDED
-            => Nomination::WORKFLOW_STATUS_UNDER_REVIEW,
+self::ACTION_FORWARDED,
+self::ACTION_RESUBMITTED
+    => Nomination::WORKFLOW_STATUS_UNDER_REVIEW,
 
         self::ACTION_RETURNED
             => Nomination::WORKFLOW_STATUS_RETURNED,

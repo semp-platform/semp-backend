@@ -23,7 +23,7 @@ class IctNominationController extends Controller
      */
     public function batches(): View
 {
-  
+
     $batches = NominationBatch::query()
         ->with([
             'election',
@@ -97,23 +97,27 @@ class IctNominationController extends Controller
     public function index(): View
     {
         $nominations = Nomination::query()
-            ->with([
-                'candidate',
-                'position',
-                'politicalParty',
-                'election',
-                'batch',
-            ])
-            ->where(
-                'current_department',
-                Nomination::DEPARTMENT_ICT
-            )
-            ->where(
-                'workflow_status',
-                Nomination::WORKFLOW_STATUS_UNDER_REVIEW
-            )
-            ->latest('received_at')
-            ->paginate(15);
+    ->with([
+        'candidate',
+        'position',
+        'politicalParty',
+        'election',
+        'batch',
+    ])
+    ->where(
+        'current_department',
+        Nomination::DEPARTMENT_ICT
+    )
+    ->where(
+        'workflow_status',
+        Nomination::WORKFLOW_STATUS_UNDER_REVIEW
+    )
+    ->whereNotIn('status', [
+        Nomination::STATUS_WITHDRAWN,
+        Nomination::STATUS_REPLACED,
+    ])
+    ->latest('received_at')
+    ->paginate(15);
 
         return view('staff.ict.nominations.index', [
             'nominations' => $nominations,
@@ -124,13 +128,20 @@ class IctNominationController extends Controller
      * Show one nomination for ICT vetting.
      */
     public function show(
-        Nomination $nomination
-    ): View {
-        abort_unless(
-            $nomination->current_department
-                === Nomination::DEPARTMENT_ICT,
-            404
-        );
+    Nomination $nomination
+): View {
+    abort_unless(
+        $nomination->current_department === Nomination::DEPARTMENT_ICT
+        && ! in_array(
+            $nomination->status,
+            [
+                Nomination::STATUS_WITHDRAWN,
+                Nomination::STATUS_REPLACED,
+            ],
+            true
+        ),
+        404
+    );
 
         $nomination->load([
             'candidate',

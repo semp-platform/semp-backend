@@ -76,7 +76,6 @@ class IctWorkflowService
                     'nomination_id' => $nomination->id,
                     'candidate_id' => $nomination->candidate_id,
                     'candidate_document_id' => $document->id,
-                    'document_type_id' => $document->document_type_id,
                     'requested_by' => auth()->id(),
                     'department' => self::DEPARTMENT_ICT,
                     'reason' => $reason,

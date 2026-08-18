@@ -15,6 +15,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Models\Candidate\CandidateDocumentReviewRequest;
+use App\Models\ElectionResult;
+
 
 class Nomination extends Model
 {
@@ -59,19 +62,20 @@ public const DEPARTMENT_LEGAL = 'legal';
     public const WORKFLOW_STATUS_APPROVED = 'approved';
 
     protected $fillable = [
-        'election_id',
-        'political_party_id',
-        'candidate_id',
-        'position_id',
-        'lga_id',
-        'lcda_id',
-        'ward_id',
-        'status',
-        'workflow_status',
-        'current_department',
-        'received_at',
-        'completed_at',
-    ];
+    'election_id',
+    'political_party_id',
+    'nomination_batch_id',
+    'candidate_id',
+    'position_id',
+    'lga_id',
+    'lcda_id',
+    'ward_id',
+    'status',
+    'workflow_status',
+    'current_department',
+    'received_at',
+    'completed_at',
+];
 
     protected $casts = [
         'received_at' => 'datetime',
@@ -218,6 +222,31 @@ public const DEPARTMENT_LEGAL = 'legal';
         return $this->status === self::STATUS_READY;
     }
 
+    public function canBeWithdrawn(): bool
+{
+    if (
+        $this->status === self::STATUS_WITHDRAWN ||
+        $this->status === self::STATUS_REPLACED
+    ) {
+        return false;
+    }
+
+    if ($this->hasPendingWithdrawal()) {
+        return false;
+    }
+
+    return in_array(
+        $this->status,
+        [
+            self::STATUS_READY,
+            self::STATUS_BATCHED,
+            self::STATUS_UNDER_REVIEW,
+            self::STATUS_APPROVED,
+        ],
+        true
+    );
+}
+
     public function isBatched(): bool
     {
         return $this->status === self::STATUS_BATCHED;
@@ -263,11 +292,17 @@ public const DEPARTMENT_LEGAL = 'legal';
         return $this->isDraft();
     }
 
-    public function canBeDeleted(): bool
-    {
-        return $this->isDraft();
-    }
-
+   public function canBeDeleted(): bool
+{
+    return in_array(
+        $this->status,
+        [
+            self::STATUS_DRAFT,
+            self::STATUS_READY,
+        ],
+        true
+    );
+}
 
 public function canBeMarkedReady(): bool
 {
@@ -302,4 +337,14 @@ public function canBeMarkedReady(): bool
             true
         );
     }
+    public function documentReviewRequests()
+{
+    return $this->hasMany(
+        CandidateDocumentReviewRequest::class
+    );
+}
+public function electionResults(): HasMany
+{
+    return $this->hasMany(ElectionResult::class);
+}
 }

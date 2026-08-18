@@ -191,33 +191,63 @@
 
                             <td class="px-6 py-4 text-sm">
 
-                                <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
-                                    {{ str_replace('_', ' ', ucfirst($nomination->workflow_status ?? 'pending')) }}
-                                </span>
+    @if($nomination->status === \App\Models\Nomination\Nomination::STATUS_WITHDRAWN)
 
-                            </td>
+        <span class="rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-700">
+            Withdrawn
+        </span>
+
+    @elseif($nomination->status === \App\Models\Nomination\Nomination::STATUS_REPLACED)
+
+        <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
+            Replaced
+        </span>
+
+    @else
+
+        <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
+            {{ str_replace('_', ' ', ucfirst($nomination->workflow_status ?? 'pending')) }}
+        </span>
+
+    @endif
+
+</td>
 
                             <td class="px-6 py-4 text-right">
 
-                                @if($nomination->current_department === \App\Models\Nomination\Nomination::DEPARTMENT_ICT)
+    @if(
+        in_array(
+            $nomination->status,
+            [
+                \App\Models\Nomination\Nomination::STATUS_WITHDRAWN,
+                \App\Models\Nomination\Nomination::STATUS_REPLACED,
+            ],
+            true
+        )
+    )
 
-                                    <a
-                                        href="{{ route('staff.ict.nominations.show', $nomination) }}"
-                                        class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
-                                    >
-                                        Open
-                                    </a>
+        <span class="text-sm text-slate-400">
+            Not available for review
+        </span>
 
-                                @else
+    @elseif($nomination->current_department === \App\Models\Nomination\Nomination::DEPARTMENT_ICT)
 
-                                    <span class="text-sm text-slate-400">
-                                        Awaiting ICT intake
-                                    </span>
+        <a
+            href="{{ route('staff.ict.nominations.show', $nomination) }}"
+            class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
+        >
+            Open
+        </a>
 
-                                @endif
+    @else
 
-                            </td>
+        <span class="text-sm text-slate-400">
+            Awaiting ICT intake
+        </span>
 
+    @endif
+
+</td>
                         </tr>
 
                     @empty

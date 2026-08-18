@@ -75,7 +75,7 @@
                         <td class="px-6 py-4 text-right">
 
                             <a
-                                href="{{ route('ict.nominations.show', $nomination) }}"
+                                href="{{ route('staff.ict.nominations.show', $nomination) }}"
                                 class="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white"
                             >
                                 Review

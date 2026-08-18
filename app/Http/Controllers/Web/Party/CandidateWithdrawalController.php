@@ -4,13 +4,13 @@ namespace App\Http\Controllers\Web\Party;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Party\StoreCandidateWithdrawalRequest;
+use App\Models\Candidate\CandidateWithdrawal;
 use App\Models\Nomination\Nomination;
+use App\Models\Reference\CandidateChangeReason;
 use App\Services\Candidate\CandidateWithdrawalService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use App\Models\Candidate\CandidateWithdrawal;
-use App\Models\Reference\CandidateChangeReason;
 
 class CandidateWithdrawalController extends Controller
 {
@@ -18,6 +18,9 @@ class CandidateWithdrawalController extends Controller
         private readonly CandidateWithdrawalService $withdrawalService
     ) {}
 
+    /**
+     * Get the currently active political party for the logged-in user.
+     */
     private function currentParty(Request $request)
     {
         return $request->user()
@@ -27,11 +30,43 @@ class CandidateWithdrawalController extends Controller
             ->firstOrFail();
     }
 
+    /**
+     * Candidate withdrawals dashboard.
+     *
+     * Shows nominations belonging to the current party that are
+     * eligible for withdrawal.
+     */
+   public function index(Request $request): View
+{
+    $party = $this->currentParty($request);
+
+    $withdrawals = CandidateWithdrawal::query()
+        ->where('political_party_id', $party->id)
+        ->with([
+            'nomination.candidate',
+            'nomination.election',
+            'nomination.position',
+            'nomination.lga',
+            'nomination.ward',
+            'nomination.lcda',
+            'candidateChangeReason',
+        ])
+        ->latest('created_at')
+        ->get();
+
+    return view('party.withdrawals.index', [
+        'party' => $party,
+        'withdrawals' => $withdrawals,
+    ]);
+}
+
+    /**
+     * Show the withdrawal request form.
+     */
     public function create(
         Request $request,
         Nomination $nomination
     ): View {
-
         $party = $this->currentParty($request);
 
         abort_unless(
@@ -39,23 +74,30 @@ class CandidateWithdrawalController extends Controller
             403
         );
 
-        $reasons = CandidateChangeReason::query()
-    ->where('change_type', 'withdrawal')
-    ->where('is_active', true)
-    ->orderBy('name')
-    ->get();
+        abort_unless(
+            $nomination->canBeWithdrawn(),
+            422
+        );
 
-return view('party.withdrawals.create', [
-    'party' => $party,
-    'nomination' => $nomination,
-    'reasons' => $reasons,
-]);
+        $reasons = CandidateChangeReason::query()
+            ->where('change_type', 'withdrawal')
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        return view('party.withdrawals.create', [
+            'party' => $party,
+            'nomination' => $nomination,
+            'reasons' => $reasons,
+        ]);
     }
 
+    /**
+     * Create a withdrawal request.
+     */
     public function store(
         StoreCandidateWithdrawalRequest $request
     ): RedirectResponse {
-
         $party = $this->currentParty($request);
 
         $nomination = Nomination::findOrFail(
@@ -68,39 +110,41 @@ return view('party.withdrawals.create', [
             $request->validated()
         );
 
-       return redirect()
-    ->route('party.withdrawals.show', $withdrawal)
-    ->with(
-        'success',
-        'Withdrawal request created successfully.'
-    );
+        return redirect()
+            ->route('party.withdrawals.show', $withdrawal)
+            ->with(
+                'success',
+                'Withdrawal request created successfully.'
+            );
     }
+
+    /**
+     * Show a withdrawal request.
+     */
     public function show(
-    Request $request,
-    CandidateWithdrawal $withdrawal
-): View {
+        Request $request,
+        CandidateWithdrawal $withdrawal
+    ): View {
+        $party = $this->currentParty($request);
 
-    $party = $this->currentParty($request);
+        abort_unless(
+            $withdrawal->political_party_id === $party->id,
+            403
+        );
 
-    abort_unless(
-        $withdrawal->political_party_id === $party->id,
-        403
-    );
+        $withdrawal->load([
+            'nomination.candidate',
+            'nomination.position',
+            'nomination.election',
+            'nomination.lga',
+            'nomination.ward',
+            'nomination.lcda',
+            'candidateChangeReason',
+        ]);
 
-   $withdrawal->load([
-    'nomination.candidate',
-    'nomination.position',
-    'nomination.election',
-    'nomination.lga',
-    'nomination.ward',
-    'nomination.lcda',
-
-    'candidateChangeReason',
-]);
-
-    return view('party.withdrawals.show', [
-        'party' => $party,
-        'withdrawal' => $withdrawal,
-    ]);
-}
+        return view('party.withdrawals.show', [
+            'party' => $party,
+            'withdrawal' => $withdrawal,
+        ]);
+    }
 }

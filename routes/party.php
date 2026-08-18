@@ -4,8 +4,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\Party\NominationController;
 use App\Http\Controllers\Web\Party\CandidateDocumentController;
 use App\Http\Controllers\Web\Party\CandidateWithdrawalController;
+use App\Http\Controllers\Web\Party\CandidateReplacementController;
 use App\Http\Controllers\Web\Party\BatchPaymentController;
 use App\Http\Controllers\Web\Party\NominationBatchController;
+use App\Http\Controllers\Web\Party\ReturnedNominationController;
+use App\Models\Nomination\Nomination;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,19 +27,48 @@ Route::prefix('party')
         |--------------------------------------------------------------------------
         */
 
-        Route::get('/dashboard', function () {
+      Route::get('/dashboard', function () {
 
-            $party = auth()->user()
-                ->politicalParties()
-                ->wherePivot('is_active', true)
-                ->where('political_parties.is_active', true)
-                ->firstOrFail();
+    $party = auth()->user()
+        ->politicalParties()
+        ->wherePivot('is_active', true)
+        ->where('political_parties.is_active', true)
+        ->firstOrFail();
 
-            return view('party.dashboard', [
-                'party' => $party,
-            ]);
+    $nominations = Nomination::query()
+        ->where('political_party_id', $party->id);
 
-        })->name('dashboard');
+    $draftNominations = (clone $nominations)
+        ->where('status', Nomination::STATUS_DRAFT)
+        ->count();
+
+    $submittedNominations = (clone $nominations)
+        ->whereIn('status', [
+            Nomination::STATUS_BATCHED,
+            Nomination::STATUS_UNDER_REVIEW,
+        ])
+        ->count();
+
+    $approvedNominations = (clone $nominations)
+        ->where('status', Nomination::STATUS_APPROVED)
+        ->count();
+
+    $returnedNominations = (clone $nominations)
+        ->where('workflow_status', Nomination::WORKFLOW_STATUS_RETURNED)
+        ->count();
+
+    $actionRequired = $draftNominations + $returnedNominations;
+
+    return view('party.dashboard', [
+        'party' => $party,
+        'draftNominations' => $draftNominations,
+        'submittedNominations' => $submittedNominations,
+        'approvedNominations' => $approvedNominations,
+        'actionRequired' => $actionRequired,
+        'returnedNominations' => $returnedNominations,
+    ]);
+
+})->name('dashboard');
 
         /*
         |--------------------------------------------------------------------------
@@ -124,6 +156,13 @@ Route::get(
         ->middleware('permission:party-nominations.view')
         ->name('nominations.show');
 
+        Route::delete(
+    '/nominations/{nomination}',
+    [NominationController::class, 'destroy']
+)
+->middleware('permission:party-nominations.update')
+->name('nominations.destroy');
+
         Route::get(
             '/nominations/{nomination}/edit',
             [NominationController::class, 'edit']
@@ -144,6 +183,8 @@ Route::get(
         )
         ->middleware('permission:party-nominations.submit')
         ->name('nominations.submit');
+
+
 
         /*
         |--------------------------------------------------------------------------
@@ -218,30 +259,82 @@ Route::get(
         */
 
         Route::prefix('withdrawals')
-            ->name('withdrawals.')
-            ->group(function () {
+    ->name('withdrawals.')
+    ->group(function () {
 
-                Route::get(
-                    '/create/{nomination}',
-                    [CandidateWithdrawalController::class, 'create']
-                )
-                ->middleware('permission:party-withdrawals.create')
-                ->name('create');
+        Route::get(
+            '/',
+            [CandidateWithdrawalController::class, 'index']
+        )
+        ->middleware('permission:party-withdrawals.view')
+        ->name('index');
 
-                Route::post(
-                    '/',
-                    [CandidateWithdrawalController::class, 'store']
-                )
-                ->middleware('permission:party-withdrawals.create')
-                ->name('store');
+        Route::get(
+            '/create/{nomination}',
+            [CandidateWithdrawalController::class, 'create']
+        )
+        ->middleware('permission:party-withdrawals.create')
+        ->name('create');
 
-                Route::get(
-                    '/{withdrawal}',
-                    [CandidateWithdrawalController::class, 'show']
-                )
-                ->middleware('permission:party-withdrawals.view')
-                ->name('show');
+        Route::post(
+            '/',
+            [CandidateWithdrawalController::class, 'store']
+        )
+        ->middleware('permission:party-withdrawals.create')
+        ->name('store');
 
-            });
+        Route::get(
+            '/{withdrawal}',
+            [CandidateWithdrawalController::class, 'show']
+        )
+        ->middleware('permission:party-withdrawals.view')
+        ->name('show');
 
+    });
+
+    /*
+|--------------------------------------------------------------------------
+| Candidate Replacements
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('replacements')
+    ->name('replacements.')
+    ->group(function () {
+
+        Route::get(
+            '/',
+            [CandidateReplacementController::class, 'index']
+        )
+        ->middleware('permission:party-nominations.view')
+        ->name('index');
+
+        Route::get(
+            '/create/{withdrawal}',
+            [CandidateReplacementController::class, 'create']
+        )
+        ->middleware('permission:party-nominations.create')
+        ->name('create');
+
+        Route::post(
+            '/{withdrawal}',
+            [CandidateReplacementController::class, 'store']
+        )
+        ->middleware('permission:party-nominations.create')
+        ->name('store');
+
+    });
+
+            /*
+|--------------------------------------------------------------------------
+| Returned Nominations
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/returned-nominations',
+    [ReturnedNominationController::class, 'index']
+)
+->middleware('permission:party-nominations.view')
+->name('returned-nominations.index');
     });

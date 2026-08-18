@@ -4,60 +4,165 @@
 
 @section('content')
 
-<div class="mb-8">
+<div class="mx-auto max-w-4xl">
 
-    <a
-        href="{{ route('party.nominations.show', $nomination) }}"
-        class="text-sm font-medium text-emerald-700 hover:text-emerald-900"
-    >
-        ← Back to Nomination
-    </a>
+    {{-- Back --}}
+    <div class="mb-6">
+        <a
+            href="{{ route('party.nominations.show', $nomination) }}"
+            class="text-sm font-medium text-emerald-700 hover:text-emerald-900"
+        >
+            &larr; Back to Candidate
+        </a>
+    </div>
 
-    <div class="mt-5">
-
-        <p class="text-sm font-medium text-emerald-700">
-            Candidate Withdrawal
-        </p>
-
-        <h1 class="mt-1 text-3xl font-bold tracking-tight text-slate-950">
-            Withdraw Candidate
+    {{-- Header --}}
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold text-slate-900">
+            Candidate Withdrawal Request
         </h1>
 
-        <p class="mt-2 text-sm text-slate-500">
-            Submit a withdrawal request for the nominated candidate.
+        <p class="mt-2 text-sm text-slate-600">
+            Submit a request to withdraw this candidate from the election.
         </p>
+    </div>
+
+    {{-- Candidate Information --}}
+    <div class="mb-8 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+
+        <h2 class="mb-5 text-sm font-semibold uppercase tracking-wide text-slate-500">
+            Candidate & Election Information
+        </h2>
+
+        <div class="grid gap-5 md:grid-cols-2">
+
+            {{-- Candidate --}}
+            <div>
+                <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
+                    Candidate
+                </p>
+
+                <p class="mt-1 text-base font-semibold text-slate-900">
+                    {{ $nomination->candidate_name }}
+                </p>
+            </div>
+
+            {{-- Election --}}
+            <div>
+                <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
+                    Election
+                </p>
+
+                <p class="mt-1 text-base font-semibold text-slate-900">
+                    {{ $nomination->election?->name ?? '—' }}
+                </p>
+            </div>
+
+            {{-- Position --}}
+            <div>
+                <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
+                    Position
+                </p>
+
+                <p class="mt-1 text-base font-semibold text-slate-900">
+                    {{ $nomination->position?->name ?? '—' }}
+                </p>
+            </div>
+
+            {{-- Electoral Area --}}
+            <div>
+                <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
+                    Electoral Area
+                </p>
+
+                <p class="mt-1 text-base font-semibold text-slate-900">
+                    {{ $nomination->electoral_area }}
+                </p>
+            </div>
+
+            {{-- Current Status --}}
+            <div>
+                <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
+                    Current Status
+                </p>
+
+                <p class="mt-1 text-base font-semibold capitalize text-slate-900">
+                    {{ str_replace('_', ' ', $nomination->status) }}
+                </p>
+            </div>
+
+            {{-- Current Department --}}
+            <div>
+                <p class="text-xs font-medium uppercase tracking-wide text-slate-500">
+                    Current OGSIEC Department
+                </p>
+
+                <p class="mt-1 text-base font-semibold uppercase text-slate-900">
+                    {{ $nomination->current_department
+                        ? $nomination->current_department
+                        : 'Party' }}
+                </p>
+            </div>
+
+        </div>
 
     </div>
 
-</div>
+    {{-- Warning --}}
+@if($nomination->current_department)
+        <div class="mb-8 rounded-xl border border-amber-200 bg-amber-50 p-5">
 
+            <div class="flex gap-3">
 
-@if ($errors->any())
+                <div class="mt-0.5 text-amber-600">
+                    !
+                </div>
 
-    <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+                <div>
 
-        <ul class="list-disc pl-5 text-sm text-red-700">
+                    <h3 class="font-semibold text-amber-900">
+                        OGSIEC withdrawal review required
+                    </h3>
 
-            @foreach ($errors->all() as $error)
+                    <p class="mt-1 text-sm leading-6 text-amber-800">
+                        This candidate has entered the OGSIEC processing workflow.
+                        The withdrawal request will be sent to the Commissioner
+                        for review. The existing nomination will not be removed
+                        while the request is pending.
+                    </p>
 
-                <li>{{ $error }}</li>
+                </div>
 
-            @endforeach
+            </div>
 
-        </ul>
+        </div>
 
-    </div>
+    @else
 
-@endif
+        <div class="mb-8 rounded-xl border border-blue-200 bg-blue-50 p-5">
 
+            <h3 class="font-semibold text-blue-900">
+                Party-level withdrawal
+            </h3>
 
-<div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            <p class="mt-1 text-sm leading-6 text-blue-800">
+                This candidate has not yet entered OGSIEC processing.
+                The withdrawal can be handled within the political party
+                workflow.
+            </p>
 
+        </div>
+
+    @endif
+
+    {{-- Withdrawal Form --}}
     <form
-    method="POST"
-    action="{{ route('party.withdrawals.store') }}"
-    enctype="multipart/form-data"
->
+        method="POST"
+        action="{{ route('party.withdrawals.store') }}"
+        enctype="multipart/form-data"
+        class="space-y-6"
+    >
+
         @csrf
 
         <input
@@ -66,130 +171,128 @@
             value="{{ $nomination->id }}"
         >
 
-        <div class="border-b border-slate-200 px-6 py-5">
+        {{-- Reason --}}
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
 
-            <h2 class="text-lg font-semibold text-slate-950">
-                Withdrawal Request
-            </h2>
+            <label
+                for="candidate_change_reason_id"
+                class="mb-2 block text-sm font-semibold text-slate-900"
+            >
+                Reason for Withdrawal
+            </label>
 
-            <p class="mt-1 text-sm text-slate-500">
-                Please provide the reason for withdrawing this candidate.
+            <select
+                id="candidate_change_reason_id"
+                name="candidate_change_reason_id"
+                required
+                class="w-full rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500"
+            >
+
+                <option value="">
+                    Select withdrawal reason
+                </option>
+
+                @foreach($reasons as $reason)
+
+                    <option
+                        value="{{ $reason->id }}"
+                        @selected(old('candidate_change_reason_id') == $reason->id)
+                    >
+                        {{ $reason->name }}
+                    </option>
+
+                @endforeach
+
+            </select>
+
+            @error('candidate_change_reason_id')
+                <p class="mt-2 text-sm text-red-600">
+                    {{ $message }}
+                </p>
+            @enderror
+
+        </div>
+
+        {{-- Remarks --}}
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+
+            <label
+                for="remarks"
+                class="mb-2 block text-sm font-semibold text-slate-900"
+            >
+                Explanation / Remarks
+            </label>
+
+            <textarea
+                id="remarks"
+                name="remarks"
+                rows="6"
+                required
+                minlength="10"
+                maxlength="5000"
+                class="w-full rounded-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500"
+                placeholder="Explain why this candidate is being withdrawn..."
+            >{{ old('remarks') }}</textarea>
+
+            <p class="mt-2 text-xs text-slate-500">
+                Provide sufficient details to support the withdrawal request.
             </p>
 
-        </div>
-
-
-        <div class="space-y-6 px-6 py-6">
-
-            <div>
-
-                <label
-                    class="block text-sm font-medium text-slate-700"
-                >
-                    Candidate
-                </label>
-
-                <p class="mt-2 text-sm text-slate-900">
-                    {{ $nomination->candidate_name }}
+            @error('remarks')
+                <p class="mt-2 text-sm text-red-600">
+                    {{ $message }}
                 </p>
-
-            </div>
-
-
-            <div>
-
-    <label
-        for="candidate_change_reason_id"
-        class="block text-sm font-medium text-slate-700"
-    >
-        Withdrawal Reason
-    </label>
-
-    <select
-        id="candidate_change_reason_id"
-        name="candidate_change_reason_id"
-        required
-        class="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-    >
-
-        <option value="">
-            -- Select Withdrawal Reason --
-        </option>
-
-        @foreach ($reasons as $reason)
-
-            <option
-                value="{{ $reason->id }}"
-                data-requires-document="{{ $reason->requires_document ? 1 : 0 }}"
-                {{ old('candidate_change_reason_id') == $reason->id ? 'selected' : '' }}
-            >
-                {{ $reason->name }}
-            </option>
-
-        @endforeach
-
-    </select>
-
-</div>
-<div>
-
-    <label
-        for="supporting_evidence"
-        class="block text-sm font-medium text-slate-700"
-    >
-        Supporting Evidence
-    </label>
-
-    <input
-        type="file"
-        id="supporting_evidence"
-        name="supporting_evidence"
-        class="mt-2 block w-full rounded-lg border border-slate-300 px-3 py-2"
-    >
-
-    <p
-        id="supporting-evidence-note"
-        class="mt-2 text-xs text-slate-500"
-    >
-        Optional unless the selected withdrawal reason requires evidence.
-    </p>
-
-</div>
-<div>
-
-    <label
-        for="remarks"
-        class="block text-sm font-medium text-slate-700"
-    >
-        Additional Remarks
-    </label>
-
-    <textarea
-        id="remarks"
-        name="remarks"
-        rows="6"
-        class="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-    >{{ old('remarks') }}</textarea>
-
-</div>
+            @enderror
 
         </div>
 
+        {{-- Supporting Evidence --}}
+        <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
 
-        <div class="flex justify-between border-t border-slate-200 px-6 py-4">
+            <label
+                for="supporting_evidence"
+                class="mb-2 block text-sm font-semibold text-slate-900"
+            >
+                Supporting Evidence
+            </label>
+
+            <input
+                id="supporting_evidence"
+                type="file"
+                name="supporting_evidence"
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                class="block w-full rounded-lg border border-slate-300 bg-white text-sm text-slate-700"
+            >
+
+            <p class="mt-2 text-xs text-slate-500">
+                Examples may include a candidate's withdrawal letter,
+                death certificate, court order, or other relevant evidence.
+                Maximum file size: 10 MB.
+            </p>
+
+            @error('supporting_evidence')
+                <p class="mt-2 text-sm text-red-600">
+                    {{ $message }}
+                </p>
+            @enderror
+
+        </div>
+
+        {{-- Actions --}}
+        <div class="flex items-center justify-end gap-3">
 
             <a
                 href="{{ route('party.nominations.show', $nomination) }}"
-                class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                class="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
             >
                 Cancel
             </a>
 
             <button
                 type="submit"
-                class="rounded-lg bg-red-600 px-5 py-2 text-sm font-semibold text-white hover:bg-red-700"
+                class="rounded-lg bg-red-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-700"
             >
-                Save Withdrawal Request
+                Submit Withdrawal Request
             </button>
 
         </div>
