@@ -26,33 +26,67 @@ class CandidateReplacementController extends Controller
     }
 
     public function index(Request $request): View
-    {
-        $party = $this->currentParty($request);
+{
+    $party = $this->currentParty($request);
 
-        $withdrawals = CandidateWithdrawal::query()
-            ->where('political_party_id', $party->id)
-            ->where(
-                'status',
-                CandidateWithdrawal::STATUS_APPROVED
-            )
-            ->whereNull('replacement_nomination_id')
-            ->with([
-                'nomination.candidate',
-                'nomination.election',
-                'nomination.position',
-                'nomination.lga',
-                'nomination.lcda',
-                'nomination.ward',
-                'candidateChangeReason',
-            ])
-            ->latest('approved_at')
-            ->get();
+    /*
+     * Approved withdrawals that still need a replacement.
+     */
+    $withdrawals = CandidateWithdrawal::query()
+        ->where('political_party_id', $party->id)
+        ->where(
+            'status',
+            CandidateWithdrawal::STATUS_APPROVED
+        )
+        ->whereNull('replacement_nomination_id')
+        ->with([
+            'nomination.candidate',
+            'nomination.election',
+            'nomination.position',
+            'nomination.lga',
+            'nomination.lcda',
+            'nomination.ward',
+            'candidateChangeReason',
+        ])
+        ->latest('approved_at')
+        ->get();
 
-        return view('party.replacements.index', [
-            'party' => $party,
-            'withdrawals' => $withdrawals,
-        ]);
-    }
+    /*
+     * Approved withdrawals that already have a replacement.
+     *
+     * These are retained as a historical record.
+     */
+    $completedReplacements = CandidateWithdrawal::query()
+        ->where('political_party_id', $party->id)
+        ->where(
+            'status',
+            CandidateWithdrawal::STATUS_APPROVED
+        )
+        ->whereNotNull('replacement_nomination_id')
+        ->with([
+            'nomination.candidate',
+            'nomination.election',
+            'nomination.position',
+            'nomination.lga',
+            'nomination.lcda',
+            'nomination.ward',
+
+            'replacementNomination.candidate',
+            'replacementNomination.position',
+            'replacementNomination.election',
+            'replacementNomination.lga',
+            'replacementNomination.lcda',
+            'replacementNomination.ward',
+        ])
+        ->latest('approved_at')
+        ->get();
+
+    return view('party.replacements.index', [
+        'party' => $party,
+        'withdrawals' => $withdrawals,
+        'completedReplacements' => $completedReplacements,
+    ]);
+}
 
     public function create(
         Request $request,

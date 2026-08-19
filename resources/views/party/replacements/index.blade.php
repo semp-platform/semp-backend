@@ -17,14 +17,18 @@
         </h1>
 
         <p class="mt-2 max-w-3xl text-sm leading-6 text-slate-500">
-            Replace candidates whose withdrawals have been approved by OGSIEC.
-            Replacement candidates inherit the payment already made for the
-            withdrawn nomination.
+            Manage approved candidate replacements and retain a record of
+            replacement candidates already registered by the party.
         </p>
 
     </div>
 
-    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+
+    {{-- ============================================================= --}}
+    {{-- CANDIDATES AWAITING REPLACEMENT --}}
+    {{-- ============================================================= --}}
+
+    <div class="mb-8 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
 
         <div class="border-b border-slate-200 px-6 py-5">
 
@@ -33,7 +37,7 @@
             </h2>
 
             <p class="mt-1 text-sm text-slate-500">
-                Only approved withdrawals without an existing replacement are shown.
+                Approved withdrawals that have not yet received a replacement candidate.
             </p>
 
         </div>
@@ -54,13 +58,7 @@
                         <div class="flex flex-wrap items-center gap-2">
 
                             <h3 class="text-base font-semibold text-slate-950">
-                                {{ $candidate?->full_name
-                                    ?? trim(implode(' ', array_filter([
-                                        $candidate?->first_name,
-                                        $candidate?->middle_name,
-                                        $candidate?->last_name,
-                                    ])))
-                                    ?: 'Unknown candidate' }}
+                                {{ $candidate?->full_name ?? 'Unknown candidate' }}
                             </h3>
 
                             <span class="inline-flex rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
@@ -120,34 +118,177 @@
 
         @empty
 
-            <div class="px-6 py-16 text-center">
+            <div class="px-6 py-10 text-center">
 
-                <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+                <h3 class="text-base font-semibold text-slate-950">
+                    No candidates currently require replacement
+                </h3>
 
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        class="h-7 w-7"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="1.8"
-                            d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2m7-8a4 4 0 100-8 4 4 0 000 8zm7-4v6m3-3h-6"
-                        />
-                    </svg>
+                <p class="mt-2 text-sm text-slate-500">
+                    Approved withdrawals awaiting replacement will appear here.
+                </p>
+
+            </div>
+
+        @endforelse
+
+    </div>
+
+
+    {{-- ============================================================= --}}
+    {{-- COMPLETED REPLACEMENTS --}}
+    {{-- ============================================================= --}}
+
+    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+
+        <div class="border-b border-slate-200 px-6 py-5">
+
+            <h2 class="text-lg font-semibold text-slate-950">
+                Replacement Records
+            </h2>
+
+            <p class="mt-1 text-sm text-slate-500">
+                Candidates already registered as replacements for withdrawn nominations.
+            </p>
+
+        </div>
+
+        @forelse($completedReplacements as $withdrawal)
+
+            @php
+                $original = $withdrawal->nomination;
+                $replacement = $withdrawal->replacementNomination;
+
+                $originalCandidate = $original?->candidate;
+                $replacementCandidate = $replacement?->candidate;
+            @endphp
+
+            <div class="border-b border-slate-100 px-6 py-6 last:border-b-0">
+
+                <div class="grid gap-6 lg:grid-cols-3">
+
+                    {{-- Original candidate --}}
+                    <div>
+
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                            Withdrawn Candidate
+                        </p>
+
+                        <h3 class="mt-2 text-base font-semibold text-slate-950">
+                            {{ $originalCandidate?->full_name ?? 'Unknown candidate' }}
+                        </h3>
+
+                        <p class="mt-1 text-sm text-slate-500">
+                            Withdrawn
+                        </p>
+
+                    </div>
+
+
+                    {{-- Replacement candidate --}}
+                    <div>
+
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                            Replacement Candidate
+                        </p>
+
+                        <h3 class="mt-2 text-base font-semibold text-slate-950">
+                            {{ $replacementCandidate?->full_name ?? 'Unknown candidate' }}
+                        </h3>
+
+                        <span class="mt-2 inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                            Registered
+                        </span>
+
+                    </div>
+
+
+                    {{-- Nomination information --}}
+                    <div>
+
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                            Nomination
+                        </p>
+
+                        <p class="mt-2 text-sm text-slate-700">
+                            <span class="font-medium">
+                                Election:
+                            </span>
+                            {{ $replacement?->election?->name ?? $original?->election?->name ?? '—' }}
+                        </p>
+
+                        <p class="mt-1 text-sm text-slate-700">
+                            <span class="font-medium">
+                                Position:
+                            </span>
+                            {{ $replacement?->position?->name ?? $original?->position?->name ?? '—' }}
+                        </p>
+
+                        <p class="mt-1 text-sm text-slate-700">
+                            <span class="font-medium">
+                                Electoral Area:
+                            </span>
+                            {{ $replacement?->electoral_area ?? $original?->electoral_area ?? '—' }}
+                        </p>
+
+                    </div>
 
                 </div>
 
-                <h3 class="mt-5 text-lg font-semibold text-slate-950">
-                    No candidates require replacement
+
+                {{-- Replacement metadata --}}
+                <div class="mt-5 flex flex-wrap gap-x-8 gap-y-2 border-t border-slate-100 pt-4 text-sm text-slate-500">
+
+                    <p>
+                        <span class="font-medium text-slate-700">
+                            Withdrawal approved:
+                        </span>
+                        {{ optional($withdrawal->approved_at)->format('d M Y') ?? '—' }}
+                    </p>
+
+                    <p>
+                        <span class="font-medium text-slate-700">
+                            Replacement nomination:
+                        </span>
+                        #{{ $replacement?->id ?? '—' }}
+                    </p>
+
+                    <p>
+                        <span class="font-medium text-slate-700">
+                            Payment:
+                        </span>
+                        Inherited from original nomination
+                    </p>
+
+                </div>
+
+                @if($replacement)
+
+                    <div class="mt-5">
+
+                        <a
+                            href="{{ route('party.nominations.show', $replacement) }}"
+                            class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                        >
+                            View Replacement Nomination
+                        </a>
+
+                    </div>
+
+                @endif
+
+            </div>
+
+        @empty
+
+            <div class="px-6 py-12 text-center">
+
+                <h3 class="text-base font-semibold text-slate-950">
+                    No replacement records yet
                 </h3>
 
-                <p class="mx-auto mt-2 max-w-lg text-sm leading-6 text-slate-500">
-                    Approved candidate withdrawals that are eligible for replacement
-                    will appear here.
+                <p class="mt-2 text-sm text-slate-500">
+                    Completed candidate replacements will be retained here for reference.
                 </p>
 
             </div>

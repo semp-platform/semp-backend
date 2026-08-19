@@ -8,6 +8,14 @@ Route::prefix('epm')
     ->middleware(['auth', 'role:EPM Officer'])
     ->group(function () {
 
+
+    Route::get(
+    '/dashboard',
+    [EpmNominationController::class, 'dashboard']
+)
+    ->middleware('permission:nominations.view')
+    ->name('dashboard');
+
         /*
         |--------------------------------------------------------------------------
         | Nomination & Vetting
@@ -34,4 +42,19 @@ Route::prefix('epm')
         )
             ->middleware('permission:nominations.review')
             ->name('nominations.forward');
-    });
+
+            Route::get(
+    '/records',
+    [EpmNominationController::class, 'records']
+)
+    ->middleware('permission:nominations.view')
+    ->name('records.index');
+
+    Route::get(
+    '/records/{nomination}',
+    [EpmNominationController::class, 'record']
+)
+    ->middleware('permission:nominations.view')
+    ->name('records.show');
+
+            });

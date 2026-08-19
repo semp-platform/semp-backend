@@ -12,11 +12,11 @@
 
     {{-- Dashboard --}}
     <a
-        href="#"
-        class="block rounded-lg px-4 py-3 text-sm font-medium text-white hover:bg-slate-800"
-    >
-        Dashboard
-    </a>
+    href="{{ route('staff.epm.dashboard') }}"
+    class="block rounded-lg px-4 py-3 text-sm font-medium text-white hover:bg-slate-800"
+>
+    Dashboard
+</a>
 
     {{-- Nomination Management --}}
     <div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
@@ -29,6 +29,12 @@
     >
         Nominations
     </a>
+    <a
+    href="{{ route('staff.epm.records.index') }}"
+    class="block rounded-lg px-4 py-3 text-sm font-medium text-white hover:bg-slate-800"
+>
+    EPM Records
+</a>
 
     {{-- Candidate Records --}}
     <div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
