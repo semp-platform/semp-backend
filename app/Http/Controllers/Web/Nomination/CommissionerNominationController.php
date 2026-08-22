@@ -23,6 +23,86 @@ class CommissionerNominationController extends Controller
     }
 
     /**
+ * Commissioner dashboard.
+ *
+ * Read-only overview of existing Commissioner work queues
+ * and completed decisions.
+ */
+public function dashboard(): View
+{
+    $awaitingNominations = Nomination::query()
+        ->where(
+            'current_department',
+            NominationWorkflowService::DEPARTMENT_COMMISSIONER
+        )
+        ->where(
+            'workflow_status',
+            Nomination::WORKFLOW_STATUS_UNDER_REVIEW
+        )
+        ->count();
+
+    $awaitingWithdrawals = \App\Models\Candidate\CandidateWithdrawal::query()
+        ->where(
+            'status',
+            \App\Models\Candidate\CandidateWithdrawal::STATUS_SUBMITTED
+        )
+        ->count();
+
+    $completedDecisions = NominationWorkflowHistory::query()
+        ->where(
+            'from_department',
+            NominationWorkflowService::DEPARTMENT_COMMISSIONER
+        )
+        ->whereIn(
+            'action',
+            [
+                NominationWorkflowService::ACTION_APPROVED,
+                NominationWorkflowService::ACTION_RETURNED,
+            ]
+        )
+        ->count();
+
+    $approvedCandidates = Candidate::query()
+        ->whereHas('nomination', function ($query) {
+            $query->where(
+                'status',
+                Nomination::STATUS_APPROVED
+            );
+        })
+        ->count();
+
+    $recentDecisions = NominationWorkflowHistory::query()
+        ->with([
+            'nomination.candidate',
+            'nomination.position',
+            'nomination.politicalParty',
+            'user',
+        ])
+        ->where(
+            'from_department',
+            NominationWorkflowService::DEPARTMENT_COMMISSIONER
+        )
+        ->whereIn(
+            'action',
+            [
+                NominationWorkflowService::ACTION_APPROVED,
+                NominationWorkflowService::ACTION_RETURNED,
+            ]
+        )
+        ->latest('created_at')
+        ->limit(5)
+        ->get();
+
+    return view('staff.commissioner.dashboard', [
+        'awaitingNominations' => $awaitingNominations,
+        'awaitingWithdrawals' => $awaitingWithdrawals,
+        'completedDecisions' => $completedDecisions,
+        'approvedCandidates' => $approvedCandidates,
+        'recentDecisions' => $recentDecisions,
+    ]);
+}
+
+    /**
      * Display nominations currently awaiting Commissioner decision.
      */
     public function index(): View

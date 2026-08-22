@@ -9,6 +9,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('nominations', function (Blueprint $table) {
+            $table->string('current_department', 50)
+                ->nullable()
+                ->after('status');
+
+            $table->string('workflow_status', 50)
+                ->nullable()
+                ->after('current_department');
+
             $table->index('current_department');
         });
     }
@@ -18,6 +26,11 @@ return new class extends Migration
         Schema::table('nominations', function (Blueprint $table) {
             $table->dropIndex([
                 'nominations_current_department_index',
+            ]);
+
+            $table->dropColumn([
+                'current_department',
+                'workflow_status',
             ]);
         });
     }

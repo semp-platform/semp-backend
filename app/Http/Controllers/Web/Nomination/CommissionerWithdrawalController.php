@@ -5,103 +5,69 @@ namespace App\Http\Controllers\Web\Nomination;
 use App\Http\Controllers\Controller;
 use App\Models\Candidate\CandidateWithdrawal;
 use Illuminate\View\View;
-use App\Services\Candidate\CandidateWithdrawalService;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 
 class CommissionerWithdrawalController extends Controller
 {
-    public function __construct(
-    protected CandidateWithdrawalService $withdrawalService
-) {
-}
     /**
-     * Display withdrawal requests currently awaiting
-     * Commissioner decision.
+     * Display candidate withdrawal history.
+     *
+     * This page is read-only. Actual approve/reject decisions
+     * are handled from the separate "Awaiting Decision" workflow.
      */
     public function index(): View
     {
         $withdrawals = CandidateWithdrawal::query()
             ->with([
                 'nomination.candidate',
+                'nomination.election',
                 'nomination.position',
                 'nomination.politicalParty',
-                'nomination.election',
+                'politicalParty',
                 'candidateChangeReason',
+                'reviewer',
             ])
-            ->where(
-                'status',
-                CandidateWithdrawal::STATUS_SUBMITTED
-            )
+            ->whereIn('status', [
+                CandidateWithdrawal::STATUS_SUBMITTED,
+                CandidateWithdrawal::STATUS_APPROVED,
+                CandidateWithdrawal::STATUS_REJECTED,
+            ])
             ->latest('submitted_at')
-            ->paginate(15);
+            ->paginate(20);
 
-        return view('staff.commissioner.withdrawals.index', [
-            'withdrawals' => $withdrawals,
-        ]);
+        return view(
+            'staff.commissioner.withdrawals.index',
+            [
+                'withdrawals' => $withdrawals,
+            ]
+        );
     }
+
+    /**
+     * Display withdrawal details.
+     *
+     * This page is read-only.
+     * The actual Commissioner decision is handled
+     * by the separate "Awaiting Decision" workflow.
+     */
     public function show(
-    CandidateWithdrawal $withdrawal
-): View {
-    abort_unless(
-        $withdrawal->status === CandidateWithdrawal::STATUS_SUBMITTED,
-        404
-    );
+        CandidateWithdrawal $withdrawal
+    ): View {
+        $withdrawal->load([
+            'nomination.candidate',
+            'nomination.position',
+            'nomination.election',
+            'nomination.lga',
+            'nomination.politicalParty',
+            'candidateChangeReason',
+            'reviewer',
+            'replacementNomination',
+        ]);
 
-    $withdrawal->load([
-        'nomination.candidate',
-        'nomination.position',
-        'nomination.election',
-        'nomination.lga',
-        'nomination.politicalParty',
-        'candidateChangeReason',
-    ]);
-
-    return view('staff.commissioner.withdrawals.show', [
-        'withdrawal' => $withdrawal,
-    ]);
-}
-public function approve(
-    CandidateWithdrawal $withdrawal
-): RedirectResponse {
-
-    $this->withdrawalService->approve(
-        $withdrawal,
-        auth()->id()
-    );
-
-    return redirect()
-        ->route('staff.commissioner.withdrawals.index')
-        ->with(
-            'success',
-            'Candidate withdrawal approved successfully.'
+        return view(
+            'staff.commissioner.withdrawals.show',
+            [
+                'withdrawal' => $withdrawal,
+            ]
         );
-}
-
-
-public function reject(
-    Request $request,
-    CandidateWithdrawal $withdrawal
-): RedirectResponse {
-
-    $validated = $request->validate([
-        'reason' => [
-            'required',
-            'string',
-            'max:2000',
-        ],
-    ]);
-
-    $this->withdrawalService->reject(
-        $withdrawal,
-        auth()->id()
-    );
-
-    return redirect()
-        ->route('staff.commissioner.withdrawals.index')
-        ->with(
-            'success',
-            'Candidate withdrawal rejected successfully.'
-        );
-}
+    }
 }

@@ -13,66 +13,53 @@
 
 
     {{-- Dashboard --}}
-    <div class="px-4 pb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
-        Dashboard / Work Queue
-    </div>
+<div class="px-4 pb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+    Dashboard
+</div>
 
-    <a
-        href="{{ route('staff.commissioner.nominations.index') }}"
-        class="block rounded-lg px-4 py-3 text-sm font-medium text-white hover:bg-slate-800"
-    >
-        Commissioner Dashboard
-    </a>
-
-
+<a
+    href="{{ route('staff.commissioner.dashboard') }}"
+    class="block rounded-lg px-4 py-3 text-sm font-medium
+        {{ request()->routeIs('staff.commissioner.dashboard')
+            ? 'bg-white/10 text-white'
+            : 'text-slate-300 hover:bg-white/5 hover:text-white' }}"
+>
+    Commissioner Dashboard
+</a>
 
     {{-- Decisions --}}
-    <div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
-        Decisions & Approvals
-    </div>
+<div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
+    Decisions & Approvals
+</div>
+
+<a
+    href="{{ route('staff.commissioner.nominations.index') }}"
+    class="block rounded-lg px-4 py-3 text-sm font-medium text-white hover:bg-slate-800"
+>
+    Nominations Awaiting Decision
+</a>
+
+<a
+    href="{{ route('staff.commissioner.withdrawals.index') }}"
+    class="block rounded-lg px-4 py-3 text-sm font-medium text-white hover:bg-slate-800"
+>
+    Withdrawals & Substitutions Awaiting Decision
+</a>
+
+<a
+    href="{{ route('staff.commissioner.decisions.index') }}"
+    class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
+>
+    Approved / Returned Decisions
+</a>
 
 
-    <a
-        href="{{ route('staff.commissioner.nominations.index') }}"
-        class="block rounded-lg px-4 py-3 text-sm font-medium text-white hover:bg-slate-800"
-    >
-        Nominations Awaiting Decision
-    </a>
+{{-- Legal Documents --}}
+<div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
+    Legal Documents (Read Only)
+</div>
 
-
-    <a
-        href="{{ route('staff.commissioner.withdrawals.index') }}"
-        class="block rounded-lg px-4 py-3 text-sm font-medium text-white hover:bg-slate-800"
-    >
-        Withdrawals & Substitutions Awaiting Decision
-    </a>
-
-
-    <a
-        href="#"
-        class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
-    >
-        Candidate Changes Awaiting Decision
-    </a>
-
-
-    <a
-        href="{{ route('staff.commissioner.decisions.index') }}"
-        class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
-    >
-        Approved / Returned Decisions
-    </a>
-
-
-
-
-    {{-- Legal Documents --}}
-    <div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
-        Legal Documents (Read Only)
-    </div>
-
-
-    <a
+<a
     href="{{ route('staff.commissioner.documents.index') }}"
     class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
 >
@@ -80,97 +67,47 @@
 </a>
 
 
-    {{-- Document Review --}}
-    <div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
-        Document Review
-    </div>
+{{-- Records --}}
+<div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
+    Records
+</div>
 
-
-    <a
-        href="#"
-        class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
-    >
-        Document Corrections
-    </a>
-
-
-
-
-    {{-- Records --}}
-    <div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
-        Records
-    </div>
-
-
-    <a
+<a
     href="{{ route('staff.commissioner.candidates.index') }}"
     class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
 >
     Candidates
 </a>
 
-
-    <a
-        href="#"
-        class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
-    >
-        Political Parties
-    </a>
-
-
-
-
-    {{-- Publication --}}
-    <div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
-        Publication
-    </div>
+<a
+    href="{{ route('staff.commissioner.primary-notices.index') }}"
+    class="block rounded-lg px-4 py-3 text-sm font-medium
+        {{ request()->routeIs('staff.commissioner.primary-notices.*')
+            ? 'bg-white/10 text-white'
+            : 'text-slate-300 hover:bg-white/5 hover:text-white' }}"
+>
+    Party Primary Notices
+</a>
 
 
-    <a
+{{-- Publication --}}
+<div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
+    Publication
+</div>
+
+<a
     href="{{ route('staff.commissioner.approved-candidates.index') }}"
     class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
 >
     Approved Candidates Pool
 </a>
 
-    <a
+<a
     href="{{ route('staff.commissioner.final-publication.index') }}"
     class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
 >
     Final Publication Approval
 </a>
-
-
-
-
-    {{-- Reporting --}}
-    <div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
-        Reporting
-    </div>
-
-
-    <a
-        href="#"
-        class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
-    >
-        Reports
-    </a>
-
-
-
-
-    {{-- Audit --}}
-    <div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
-        Audit
-    </div>
-
-
-    <a
-        href="#"
-        class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
-    >
-        Workflow History & Activity Logs
-    </a>
 
 
 </nav>

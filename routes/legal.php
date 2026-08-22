@@ -2,11 +2,78 @@
 
 use App\Http\Controllers\Web\Nomination\LegalNominationController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Web\Legal\LegalDashboardController;
+use App\Http\Controllers\Web\Legal\LegalCandidateController;
+use App\Http\Controllers\Web\Legal\LegalPoliticalPartyController;
+use App\Http\Controllers\Web\Legal\LegalWorkflowHistoryController;
+
 
 Route::prefix('legal')
     ->name('staff.legal.')
     ->middleware(['auth', 'role:Legal Officer'])
     ->group(function () {
+
+    /*
+|--------------------------------------------------------------------------
+| Candidate Records
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/candidates',
+    [LegalCandidateController::class, 'index']
+)
+    ->middleware('permission:legal.view')
+    ->name('candidates.index');
+
+Route::get(
+    '/candidates/{candidate}',
+    [LegalCandidateController::class, 'show']
+)
+    ->middleware('permission:legal.view')
+    ->name('candidates.show');
+
+
+/*
+|--------------------------------------------------------------------------
+| Political Parties
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/political-parties',
+    [LegalPoliticalPartyController::class, 'index']
+)
+    ->middleware('permission:legal.view')
+    ->name('political-parties.index');
+
+Route::get(
+    '/political-parties/{politicalParty}',
+    [LegalPoliticalPartyController::class, 'show']
+)
+    ->middleware('permission:legal.view')
+    ->name('political-parties.show');
+
+
+/*
+|--------------------------------------------------------------------------
+| Workflow History
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/workflow-history',
+    [LegalWorkflowHistoryController::class, 'index']
+)
+    ->middleware('permission:legal.view')
+    ->name('workflow-history.index');
+
+    Route::get(
+    '/dashboard',
+    [LegalDashboardController::class, 'index']
+)
+    ->middleware('permission:legal.view')
+    ->name('dashboard');
 
         /*
         |--------------------------------------------------------------------------
@@ -68,4 +135,11 @@ Route::prefix('legal')
         )
             ->middleware('permission:legal.view')
             ->name('documents.download');
+
+            Route::get(
+    '/review',
+    [LegalNominationController::class, 'review']
+)
+    ->middleware('permission:legal.view')
+    ->name('staff.legal.review.index');
     });

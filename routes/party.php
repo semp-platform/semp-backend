@@ -9,7 +9,7 @@ use App\Http\Controllers\Web\Party\BatchPaymentController;
 use App\Http\Controllers\Web\Party\NominationBatchController;
 use App\Http\Controllers\Web\Party\ReturnedNominationController;
 use App\Models\Nomination\Nomination;
-
+use App\Http\Controllers\Web\Party\PartyPrimaryNoticeController;
 /*
 |--------------------------------------------------------------------------
 | Political Party Portal
@@ -209,6 +209,45 @@ Route::get(
 )
 ->middleware('permission:party-nominations.submit')
 ->name('nomination-batches.submit');
+
+/*
+|--------------------------------------------------------------------------
+| Party Primary Notices
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('primary-notices')
+    ->name('primary-notices.')
+    ->group(function () {
+
+        Route::get(
+            '/',
+            [PartyPrimaryNoticeController::class, 'index']
+        )
+            ->middleware('permission:party-nominations.view')
+            ->name('index');
+
+        Route::get(
+            '/create',
+            [PartyPrimaryNoticeController::class, 'create']
+        )
+            ->middleware('permission:party-nominations.create')
+            ->name('create');
+
+        Route::post(
+            '/',
+            [PartyPrimaryNoticeController::class, 'store']
+        )
+            ->middleware('permission:party-nominations.create')
+            ->name('store');
+
+        Route::get(
+            '/{partyPrimaryNotice}',
+            [PartyPrimaryNoticeController::class, 'show']
+        )
+            ->middleware('permission:party-nominations.view')
+            ->name('show');
+    });
         /*
         |--------------------------------------------------------------------------
         | Party Payments

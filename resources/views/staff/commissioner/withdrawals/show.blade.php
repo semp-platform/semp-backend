@@ -133,39 +133,6 @@
     </div>
 
 </div>
-<div class="mt-8 flex justify-end gap-3">
 
-    <form
-        method="POST"
-        action="{{ route('staff.commissioner.withdrawals.reject', $withdrawal) }}"
-    >
-        @csrf
-
-        <button
-            type="submit"
-            class="rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-700"
-        >
-            Reject Withdrawal
-        </button>
-
-    </form>
-
-
-    <form
-        method="POST"
-        action="{{ route('staff.commissioner.withdrawals.approve', $withdrawal) }}"
-    >
-        @csrf
-
-        <button
-            type="submit"
-            class="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700"
-        >
-            Approve Withdrawal
-        </button>
-
-    </form>
-
-</div>
 
 @endsection

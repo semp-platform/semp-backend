@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('candidates', function (Blueprint $table) {
-            $table->string('qualification')->nullable()->after('date_of_birth');
+            $table->string('qualification')
+                ->nullable()
+                ->after('date_of_birth');
 
             $table->text('qualification_details')
                 ->nullable()
@@ -25,10 +27,6 @@ return new class extends Migration
             $table->string('disability_type')
                 ->nullable()
                 ->after('is_pwd');
-
-            $table->text('disability_details')
-                ->nullable()
-                ->after('disability_type');
         });
     }
 
@@ -43,7 +41,6 @@ return new class extends Migration
                 'qualification_details',
                 'is_pwd',
                 'disability_type',
-                'disability_details',
             ]);
         });
     }

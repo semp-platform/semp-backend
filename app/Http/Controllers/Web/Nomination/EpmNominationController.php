@@ -11,6 +11,7 @@ use Illuminate\View\View;
 use App\Models\Nomination\NominationWorkflowHistory;
 use App\Models\Election\Election;
 use App\Models\Election\Position;
+use App\Models\PrimaryEvent;
 
 
 class EpmNominationController extends Controller
@@ -275,6 +276,9 @@ public function record(
 /**
  * EPM dashboard.
  */
+/**
+ * EPM dashboard.
+ */
 public function dashboard(): View
 {
     /*
@@ -299,11 +303,6 @@ public function dashboard(): View
     |--------------------------------------------------------------------------
     | Nominations processed by EPM
     |--------------------------------------------------------------------------
-    |
-    | A nomination is considered processed by EPM once it has
-    | an immutable workflow history entry showing EPM as the
-    | originating department.
-    |
     */
 
     $processedByEpm = NominationWorkflowHistory::query()
@@ -342,10 +341,6 @@ public function dashboard(): View
     |--------------------------------------------------------------------------
     | Completed
     |--------------------------------------------------------------------------
-    |
-    | Completed means the nomination has ultimately reached the
-    | approved state.
-    |
     */
 
     $completed = Nomination::query()
@@ -363,10 +358,6 @@ public function dashboard(): View
     |--------------------------------------------------------------------------
     | Returned
     |--------------------------------------------------------------------------
-    |
-    | These are EPM-processed nominations whose current workflow
-    | status is returned.
-    |
     */
 
     $returned = Nomination::query()
@@ -404,6 +395,53 @@ public function dashboard(): View
         ->get();
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | Party primary notifications
+    |--------------------------------------------------------------------------
+    |
+    | These events are created automatically when the Commissioner
+    | approves a party primary notice.
+    |
+    */
+
+    $partyPrimaryNotifications = PrimaryEvent::query()
+        ->where(
+            'notice_status',
+            PrimaryEvent::NOTICE_RECEIVED
+        )
+        ->with([
+            'politicalParty',
+            'election',
+            'position',
+        ])
+        ->latest('notice_received_at')
+        ->take(10)
+        ->get();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Pending party primary notifications
+    |--------------------------------------------------------------------------
+    |
+    | These are primary events that have reached EPM but have
+    | not yet progressed beyond scheduling/monitor assignment.
+    |
+    */
+
+    $pendingPrimaryNotifications = PrimaryEvent::query()
+        ->where(
+            'notice_status',
+            PrimaryEvent::NOTICE_RECEIVED
+        )
+        ->whereIn('status', [
+            PrimaryEvent::STATUS_SCHEDULED,
+            PrimaryEvent::STATUS_MONITOR_ASSIGNED,
+        ])
+        ->count();
+
+
     return view('staff.epm.dashboard', [
         'pendingReview' => $pendingReview,
         'processedByEpm' => $processedByEpm,
@@ -411,7 +449,9 @@ public function dashboard(): View
         'completed' => $completed,
         'returned' => $returned,
         'recentActivity' => $recentActivity,
+
+        'partyPrimaryNotifications' => $partyPrimaryNotifications,
+        'pendingPrimaryNotifications' => $pendingPrimaryNotifications,
     ]);
 }
-
 }

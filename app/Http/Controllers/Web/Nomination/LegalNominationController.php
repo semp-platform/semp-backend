@@ -8,6 +8,7 @@ use App\Services\Workflow\NominationWorkflowService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use App\Models\Nomination\NominationWorkflowHistory;
 
 class LegalNominationController extends Controller
 {
@@ -99,4 +100,70 @@ class LegalNominationController extends Controller
                 'Nomination forwarded to the Commissioner successfully.'
             );
     }
+
+    /**
+ * Display Legal review history.
+ *
+ * Read-only. This does not alter nomination workflow state.
+ */
+public function review(Request $request): View
+{
+    $query = NominationWorkflowHistory::query()
+        ->with([
+            'nomination.candidate',
+            'nomination.politicalParty',
+            'nomination.position',
+            'nomination.election',
+            'user',
+        ])
+        ->where('from_department', NominationWorkflowService::DEPARTMENT_LEGAL);
+
+    if ($request->filled('action')) {
+        $query->where(
+            'action',
+            $request->input('action')
+        );
+    }
+
+    if ($request->filled('date_from')) {
+        $query->whereDate(
+            'created_at',
+            '>=',
+            $request->input('date_from')
+        );
+    }
+
+    if ($request->filled('date_to')) {
+        $query->whereDate(
+            'created_at',
+            '<=',
+            $request->input('date_to')
+        );
+    }
+
+    if ($request->filled('search')) {
+        $search = $request->input('search');
+
+        $query->whereHas('nomination', function ($nominationQuery) use ($search) {
+            $nominationQuery->whereHas(
+                'candidate',
+                function ($candidateQuery) use ($search) {
+                    $candidateQuery
+                        ->where('first_name', 'ilike', "%{$search}%")
+                        ->orWhere('middle_name', 'ilike', "%{$search}%")
+                        ->orWhere('last_name', 'ilike', "%{$search}%");
+                }
+            );
+        });
+    }
+
+    $reviews = $query
+        ->latest('created_at')
+        ->paginate(20)
+        ->withQueryString();
+
+    return view('staff.legal.review.index', [
+        'reviews' => $reviews,
+    ]);
+}
 }

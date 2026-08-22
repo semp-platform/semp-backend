@@ -14,7 +14,6 @@ return new class extends Migration
                 'qualification_details',
                 'is_pwd',
                 'disability_type',
-                'disability_details',
             ]);
         });
     }
@@ -26,7 +25,6 @@ return new class extends Migration
             $table->text('qualification_details')->nullable();
             $table->boolean('is_pwd')->default(false);
             $table->string('disability_type')->nullable();
-            $table->text('disability_details')->nullable();
         });
     }
 };

@@ -1,7 +1,7 @@
 <div class="border-b border-slate-800 px-6 py-6">
     <div class="text-lg font-bold">
-        Legal
-    </div>
+    Legal & Compliance
+</div>
 
     <div class="mt-1 text-sm text-slate-400">
         OGSIEC Staff
@@ -10,81 +10,75 @@
 
 <nav class="flex-1 overflow-y-auto px-4 py-6 space-y-1">
 
-    {{-- Dashboard / Work Queue --}}
+    {{-- Dashboard --}}
     <a
-        href="{{ route('staff.legal.nominations.index') }}"
-        class="block rounded-lg px-4 py-3 text-sm font-medium text-white hover:bg-slate-800"
+        href="{{ route('staff.legal.dashboard') }}"
+        class="block rounded-lg px-4 py-3 text-sm font-medium
+            {{ request()->routeIs('staff.legal.dashboard')
+                ? 'bg-white/10 text-white'
+                : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}"
     >
-        Dashboard / Work Queue
+        Dashboard
     </a>
 
-    {{-- Nomination Management --}}
-    <div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
-        Nomination Management
-    </div>
-
-    <a
-        href="{{ route('staff.legal.nominations.index') }}"
-        class="block rounded-lg px-4 py-3 text-sm font-medium text-white hover:bg-slate-800"
-    >
-        Nominations
-    </a>
 
     {{-- Legal Review --}}
-<div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
-    Legal Review
+<div class="px-4 pb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+    Legal & Compliance
 </div>
 
 <a
-    href="#"
-    class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
+    href="{{ route('staff.legal.nominations.index') }}"
+    class="block rounded-lg px-4 py-3 text-sm font-medium
+        {{ request()->routeIs('staff.legal.nominations.*')
+            ? 'bg-white/10 text-white'
+            : 'text-slate-300 hover:bg-white/5 hover:text-white' }}"
 >
     Legal Review
 </a>
 
+
+    {{-- Legal & Compliance --}}
+    <div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
+        Legal & Compliance
+    </div>
+
+    <a
+        href="{{ route('staff.legal.documents.index') }}"
+        class="block rounded-lg px-4 py-3 text-sm
+            {{ request()->routeIs('staff.legal.documents.*')
+                ? 'bg-white/10 text-white'
+                : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}"
+    >
+        Court Orders & Injunctions
+    </a>
+
+
+    {{-- Records --}}
+    <div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
+        Records
+    </div>
+
 <a
-    href="{{ route('staff.legal.documents.index') }}"
+    href="{{ route('staff.legal.candidates.index') }}"
     class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
 >
-    Court Orders & Injunctions
+    Candidates
 </a>
 
-    {{-- Candidate Records --}}
-    <div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
-        Candidate Records
-    </div>
+<a
+    href="{{ route('staff.legal.political-parties.index') }}"
+    class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
+>
+    Political Parties
+</a>
 
-    <a
-        href="#"
-        class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
-    >
-        Candidates
-    </a>
-
-    {{-- Political Parties --}}
-    <div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
-        Political Parties
-    </div>
-
-    <a
-        href="#"
-        class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
-    >
-        Political Parties
-    </a>
-
-    {{-- Workflow --}}
-    <div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
-        Workflow
-    </div>
-
-    <a
-        href="#"
-        class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
-    >
-        Workflow History
-    </a>
-
+<a
+    href="{{ route('staff.legal.workflow-history.index') }}"
+    class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
+>
+    Workflow History & Activity Logs
+</a>
 </nav>
 
 <div class="border-t border-slate-800 p-4">

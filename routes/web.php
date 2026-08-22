@@ -264,4 +264,19 @@ Route::middleware('auth')->group(function () {
                 'toggleTicker'
             )->name('ticker');
         });
+
+        Route::middleware('auth')->get('/notifications/{notification}/read', function ($notification) {
+    $user = request()->user();
+
+    $record = $user->notifications()
+        ->whereKey($notification)
+        ->firstOrFail();
+
+    $record->markAsRead();
+
+    return redirect($record->data['url'] ?? '/');
+})->name('notifications.read');
+
+
+
 });

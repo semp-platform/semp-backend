@@ -213,12 +213,14 @@ public function approve(
  */
 public function reject(
     CandidateWithdrawal $withdrawal,
-    int $reviewerId
+    int $reviewerId,
+    ?string $reason = null
 ): CandidateWithdrawal {
 
     return DB::transaction(function () use (
         $withdrawal,
-        $reviewerId
+        $reviewerId,
+        $reason
     ) {
 
         if (
@@ -235,9 +237,11 @@ public function reject(
             'rejected_at' => now(),
             'reviewed_by' => $reviewerId,
             'reviewed_at' => now(),
+            'review_comment' => $reason,
         ]);
 
         return $withdrawal->fresh();
     });
 }
+
 }

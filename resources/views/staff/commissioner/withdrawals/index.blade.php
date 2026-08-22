@@ -4,8 +4,9 @@
 
 @section('content')
 
-<div class="mb-8">
+<div class="mx-auto max-w-7xl space-y-6">
 
+    {{-- Header --}}
     <div>
         <p class="text-sm font-medium text-emerald-700">
             Commissioner
@@ -16,151 +17,206 @@
         </h1>
 
         <p class="mt-2 text-sm text-slate-500">
-            Review candidate withdrawal requests submitted by political parties.
+            Review pending candidate withdrawals and view withdrawal history.
         </p>
     </div>
 
-</div>
-
-@if (session('success'))
-    <div class="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-        {{ session('success') }}
-    </div>
-@endif
-
-<div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-
-    @if ($withdrawals->isEmpty())
-
-        <div class="px-6 py-16 text-center">
-
-            <h2 class="text-lg font-semibold text-slate-900">
-                No withdrawal requests
-            </h2>
-
-            <p class="mx-auto mt-2 max-w-lg text-sm text-slate-500">
-                There are currently no candidate withdrawal requests awaiting Commissioner review.
-            </p>
-
+    {{-- Success --}}
+    @if (session('success'))
+        <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            {{ session('success') }}
         </div>
+    @endif
 
-    @else
+    {{-- Withdrawals --}}
+    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
 
-        <div class="overflow-x-auto">
+        @if ($withdrawals->isEmpty())
 
-            <table class="min-w-full divide-y divide-slate-200">
+            <div class="px-6 py-16 text-center">
 
-                <thead class="bg-slate-50">
-                    <tr>
+                <h2 class="text-lg font-semibold text-slate-900">
+                    No withdrawal requests
+                </h2>
 
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                            Candidate
-                        </th>
+                <p class="mx-auto mt-2 max-w-lg text-sm text-slate-500">
+                    There are currently no candidate withdrawal requests or withdrawal history records.
+                </p>
 
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                            Political Party
-                        </th>
+            </div>
 
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                            Election
-                        </th>
+        @else
 
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                            Position
-                        </th>
+            <div class="overflow-x-auto">
 
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                            Reason
-                        </th>
+                <table class="min-w-full divide-y divide-slate-200">
 
-                        <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                            Submitted
-                        </th>
+                    <thead class="bg-slate-50">
 
-                        <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
-                            Action
-                        </th>
+                        <tr>
 
-                    </tr>
-                </thead>
+                            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                Candidate
+                            </th>
 
-                <tbody class="divide-y divide-slate-100">
+                            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                Political Party
+                            </th>
 
-                    @foreach ($withdrawals as $withdrawal)
+                            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                Election
+                            </th>
 
-                        <tr class="hover:bg-slate-50">
+                            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                Position
+                            </th>
 
-                            <td class="px-6 py-4">
+                            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                Reason
+                            </th>
 
-                                <div class="font-medium text-slate-900">
-                                    {{ $withdrawal->nomination->candidate_name }}
-                                </div>
+                            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                Submitted
+                            </th>
 
-                                <div class="mt-1 text-xs text-slate-500">
-                                    Candidate ID:
-                                    {{ $withdrawal->nomination->candidate->id }}
-                                </div>
+                            <th class="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                Status
+                            </th>
 
-                            </td>
-
-                            <td class="px-6 py-4 text-sm text-slate-700">
-                                {{ $withdrawal->nomination->politicalParty->name }}
-                            </td>
-
-                            <td class="px-6 py-4 text-sm text-slate-700">
-                                {{ $withdrawal->nomination->election->name }}
-                            </td>
-
-                            <td class="px-6 py-4 text-sm text-slate-700">
-                                {{ $withdrawal->nomination->position->name }}
-                            </td>
-
-                            <td class="px-6 py-4">
-
-                                <div class="text-sm font-medium text-slate-900">
-                                    {{ $withdrawal->candidateChangeReason?->name ?? '—' }}
-                                </div>
-
-                                @if ($withdrawal->remarks)
-                                    <div class="mt-1 max-w-xs truncate text-xs text-slate-500">
-                                        {{ $withdrawal->remarks }}
-                                    </div>
-                                @endif
-
-                            </td>
-
-                            <td class="px-6 py-4 text-sm text-slate-700">
-                                {{ optional($withdrawal->submitted_at)->format('d M Y H:i') }}
-                            </td>
-
-                            <td class="px-6 py-4 text-right">
-
-                                <a
-                                    href="{{ route('staff.commissioner.withdrawals.show', $withdrawal) }}"
-                                    class="text-sm font-semibold text-emerald-700 hover:text-emerald-900"
-                                >
-                                    View
-                                </a>
-
-                            </td>
+                            <th class="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
+                                Action
+                            </th>
 
                         </tr>
 
-                    @endforeach
+                    </thead>
 
-                </tbody>
+                    <tbody class="divide-y divide-slate-100">
 
-            </table>
+    @foreach ($withdrawals as $withdrawal)
 
-        </div>
+        <tr class="hover:bg-slate-50">
 
-        @if ($withdrawals->hasPages())
-            <div class="border-t border-slate-200 px-6 py-4">
-                {{ $withdrawals->links() }}
+            {{-- Candidate --}}
+            <td class="px-6 py-4">
+
+                <div class="font-medium text-slate-900">
+                    {{ $withdrawal->nomination?->candidate_name
+                        ?? $withdrawal->nomination?->candidate?->name
+                        ?? '—' }}
+                </div>
+
+                @if ($withdrawal->nomination?->candidate)
+                    <div class="mt-1 text-xs text-slate-500">
+                        Candidate ID:
+                        {{ $withdrawal->nomination->candidate->id }}
+                    </div>
+                @endif
+
+            </td>
+
+            {{-- Political Party --}}
+            <td class="px-6 py-4 text-sm text-slate-700">
+                {{ $withdrawal->nomination?->politicalParty?->name ?? '—' }}
+            </td>
+
+            {{-- Election --}}
+            <td class="px-6 py-4 text-sm text-slate-700">
+                {{ $withdrawal->nomination?->election?->name ?? '—' }}
+            </td>
+
+            {{-- Position --}}
+            <td class="px-6 py-4 text-sm text-slate-700">
+                {{ $withdrawal->nomination?->position?->name ?? '—' }}
+            </td>
+
+            {{-- Reason --}}
+            <td class="px-6 py-4">
+
+                <div class="text-sm font-medium text-slate-900">
+                    {{ $withdrawal->candidateChangeReason?->name ?? '—' }}
+                </div>
+
+                @if ($withdrawal->remarks)
+                    <div class="mt-1 max-w-xs truncate text-xs text-slate-500">
+                        {{ $withdrawal->remarks }}
+                    </div>
+                @endif
+
+            </td>
+
+            {{-- Submitted --}}
+            <td class="px-6 py-4 text-sm text-slate-700">
+                {{ $withdrawal->submitted_at?->format('d M Y H:i') ?? '—' }}
+            </td>
+
+            {{-- Status --}}
+            <td class="px-6 py-4">
+
+                @if ($withdrawal->status === \App\Models\Candidate\CandidateWithdrawal::STATUS_SUBMITTED)
+
+                    <span class="inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                        Pending Review
+                    </span>
+
+                @elseif ($withdrawal->status === \App\Models\Candidate\CandidateWithdrawal::STATUS_APPROVED)
+
+                    <span class="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                        Approved
+                    </span>
+
+                @elseif ($withdrawal->status === \App\Models\Candidate\CandidateWithdrawal::STATUS_REJECTED)
+
+                    <span class="inline-flex rounded-full bg-red-100 px-2.5 py-1 text-xs font-semibold text-red-700">
+                        Rejected
+                    </span>
+
+                @else
+
+                    <span class="inline-flex rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                        {{ ucfirst($withdrawal->status) }}
+                    </span>
+
+                @endif
+
+            </td>
+
+            {{-- Action --}}
+            <td class="px-6 py-4 text-right">
+
+                <a
+                    href="{{ route(
+                        'staff.commissioner.withdrawals.show',
+                        $withdrawal
+                    ) }}"
+                    class="text-sm font-semibold text-emerald-700 hover:text-emerald-900"
+                >
+                    View
+                </a>
+
+            </td>
+
+        </tr>
+
+    @endforeach
+
+</tbody>
+
+                </table>
+
             </div>
+
+            @if ($withdrawals->hasPages())
+
+                <div class="border-t border-slate-200 px-6 py-4">
+                    {{ $withdrawals->links() }}
+                </div>
+
+            @endif
+
         @endif
 
-    @endif
+    </div>
 
 </div>
 

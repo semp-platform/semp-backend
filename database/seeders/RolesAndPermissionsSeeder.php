@@ -31,6 +31,13 @@ class RolesAndPermissionsSeeder extends Seeder
             'nominations.view',
             'nominations.review',
             'nominations.approve',
+// Primary event monitoring
+'primary-monitoring.view',
+'primary-monitoring.create',
+'primary-monitoring.assign',
+'primary-monitoring.review',
+'primary-monitoring.approve',
+'primary-monitoring.return',
 
             // Political party nomination activities
             'party-nominations.view',
@@ -39,6 +46,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'party-nominations.submit',
             'party-nominations.withdraw',
             'party-nominations.replace',
+
+            'party-primary-notices.view',
+'party-primary-notices.review',
+'party-primary-notices.approve',
 
             // Candidate withdrawals
             'party-withdrawals.view',
@@ -244,6 +255,9 @@ class RolesAndPermissionsSeeder extends Seeder
             'nominations.view',
             'nominations.review',
 
+'primary-monitoring.view',
+'primary-monitoring.create',
+'primary-monitoring.assign',
             'candidates.view',
             'parties.view',
         ]);
@@ -260,8 +274,7 @@ class RolesAndPermissionsSeeder extends Seeder
                 'guard_name' => 'web',
             ],
             [
-                'dashboard_route' => 'staff.legal.nominations.index',
-            ]
+'dashboard_route' => 'staff.legal.dashboard',            ]
         );
 
         $legalOfficer->syncPermissions([
@@ -299,6 +312,7 @@ class RolesAndPermissionsSeeder extends Seeder
             [
                 'dashboard_route' => 'staff.commissioner.nominations.index',
             ]
+
         );
 
         $commissioner->syncPermissions([
@@ -307,6 +321,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'nominations.view',
             'nominations.review',
             'nominations.approve',
+
+            'party-primary-notices.view',
+'party-primary-notices.review',
+'party-primary-notices.approve',
 
             'withdrawals.view',
             'withdrawals.review',
@@ -318,6 +336,11 @@ class RolesAndPermissionsSeeder extends Seeder
 
             'payments.view',
             'reports.view',
+            // Primary monitoring
+            'primary-monitoring.view',
+            'primary-monitoring.review',
+    'primary-monitoring.approve',
+    'primary-monitoring.return',
         ]);
 
         /*

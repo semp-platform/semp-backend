@@ -3,11 +3,27 @@
 use App\Http\Controllers\Web\Nomination\CommissionerNominationController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\Nomination\CommissionerWithdrawalController;
+use App\Http\Controllers\Web\Nomination\CommissionerPrimaryNoticeController;
+use App\Http\Controllers\Web\Nomination\CommissionerPrimaryMonitoringController;
+
 
 Route::prefix('commissioner')
     ->name('staff.commissioner.')
     ->middleware(['auth', 'role:Commissioner'])
     ->group(function () {
+
+    /*
+|--------------------------------------------------------------------------
+| Commissioner Dashboard
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/dashboard',
+    [CommissionerNominationController::class, 'dashboard']
+)
+    ->middleware('permission:nominations.view')
+    ->name('dashboard');
 
         /*
         |--------------------------------------------------------------------------
@@ -123,7 +139,7 @@ Route::get(
 )
     ->middleware('permission:nominations.view')
     ->name('final-publication.export.pdf');
-    
+
             /*
 |--------------------------------------------------------------------------
 | Candidate Withdrawal Decisions
@@ -185,5 +201,105 @@ Route::post(
         )
             ->middleware('permission:nominations.view')
             ->name('documents.download');
+
+                /*
+|--------------------------------------------------------------------------
+| Party Primary Notices
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('primary-notices')
+    ->name('primary-notices.')
+    ->group(function () {
+
+        Route::get(
+            '/',
+            [CommissionerPrimaryNoticeController::class, 'index']
+        )
+            ->middleware('permission:party-primary-notices.view')
+            ->name('index');
+
+        Route::get(
+            '/{partyPrimaryNotice}',
+            [CommissionerPrimaryNoticeController::class, 'show']
+        )
+            ->middleware('permission:party-primary-notices.view')
+            ->name('show');
+
+        Route::post(
+            '/{partyPrimaryNotice}/approve',
+            [CommissionerPrimaryNoticeController::class, 'approve']
+        )
+            ->middleware('permission:party-primary-notices.approve')
+            ->name('approve');
+
+        Route::post(
+            '/{partyPrimaryNotice}/return',
+            [CommissionerPrimaryNoticeController::class, 'returnToParty']
+        )
+            ->middleware('permission:party-primary-notices.review')
+            ->name('return');
+
+        Route::post(
+            '/{partyPrimaryNotice}/reject',
+            [CommissionerPrimaryNoticeController::class, 'reject']
+        )
+            ->middleware('permission:party-primary-notices.review')
+            ->name('reject');
+    });
+
+    /*
+|--------------------------------------------------------------------------
+| Primary Monitoring Reports
+|--------------------------------------------------------------------------
+*/
+
+Route::prefix('primary-monitoring')
+    ->name('primary-monitoring.')
+    ->group(function () {
+
+        Route::get(
+            '/reports',
+            [CommissionerPrimaryMonitoringController::class, 'reports']
+        )
+            ->middleware('permission:primary-monitoring.view')
+            ->name('reports.index');
+
+        Route::get(
+            '/reports/{report}',
+            [CommissionerPrimaryMonitoringController::class, 'reportShow']
+        )
+            ->middleware('permission:primary-monitoring.view')
+            ->name('reports.show');
+
+            Route::post(
+    '/reports/{report}/approve',
+    [CommissionerPrimaryMonitoringController::class, 'approve']
+)
+    ->middleware('permission:primary-monitoring.approve')
+    ->name('reports.approve');
+
+Route::post(
+    '/reports/{report}/return',
+    [CommissionerPrimaryMonitoringController::class, 'return']
+)
+    ->middleware('permission:primary-monitoring.return')
+    ->name('reports.return');
+
+            Route::post(
+    '/reports/{report}/approve',
+    [CommissionerPrimaryMonitoringController::class, 'approve']
+)
+    ->middleware('permission:primary-monitoring.approve')
+    ->name('reports.approve');
+
+Route::post(
+    '/reports/{report}/return',
+    [CommissionerPrimaryMonitoringController::class, 'return']
+)
+    ->middleware('permission:primary-monitoring.return')
+    ->name('reports.return');
+    });
+
 
     });

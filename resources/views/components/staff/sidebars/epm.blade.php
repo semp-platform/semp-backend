@@ -61,18 +61,25 @@
     </a>
 
     {{-- Monitoring --}}
-    <div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
-        Monitoring
-    </div>
+<div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
+    Monitoring
+</div>
 
-    <a
-        href="#"
-        class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
-    >
-        Primary Monitoring
-    </a>
+<a
+    href="{{ route('staff.epm.primary-monitoring.index') }}"
+    class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
+>
+    Primary Monitoring
+</a>
 
-    {{-- Workflow --}}
+<a
+    href="{{ route('staff.epm.primary-monitoring.reports.index') }}"
+    class="block rounded-lg px-4 py-3 text-sm text-slate-300 hover:bg-slate-800 hover:text-white"
+>
+    Monitoring Reports
+</a>
+
+{{-- Workflow --}}
     <div class="px-4 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
         Workflow
     </div>

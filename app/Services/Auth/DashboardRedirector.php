@@ -70,7 +70,7 @@ class DashboardRedirector
 */
 
 if ($user->hasRole('Commissioner')) {
-    return 'staff.commissioner.nominations.index';
+    return 'staff.commissioner.dashboard';
 }
 
         /*
