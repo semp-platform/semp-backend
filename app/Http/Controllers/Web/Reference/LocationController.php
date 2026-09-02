@@ -7,9 +7,26 @@ use App\Models\Reference\Lga;
 use App\Models\Reference\Ward;
 use App\Models\Reference\Lcda;
 use Illuminate\Http\JsonResponse;
+use App\Models\Reference\LcdaWard;
+
 
 class LocationController extends Controller
 {
+
+
+public function lcdaWards(int $lcda): JsonResponse
+{
+    return response()->json(
+        LcdaWard::query()
+            ->where('lcda_id', $lcda)
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get([
+                'id',
+                'name',
+            ])
+    );
+}
     public function lgas(int $state): JsonResponse
     {
         return response()->json(

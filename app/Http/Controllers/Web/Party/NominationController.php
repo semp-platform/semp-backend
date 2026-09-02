@@ -30,7 +30,7 @@ public function index(Request $request): View
         ->where('political_party_id', $party->id)
        ->with([
     'candidate',
-    'election',
+    'election.electionType',
     'position',
     'lga',
     'ward',
@@ -55,7 +55,7 @@ public function show(
         ->where('political_party_id', $party->id)
       ->with([
     'candidate',
-    'election',
+    'election.electionType',
     'position',
     'lga',
     'ward',
@@ -166,11 +166,12 @@ public function verifyNin(Request $request): JsonResponse
         ->where('political_party_id', $party->id)
         ->with([
     'candidate',
-    'election',
+    'election.electionType',
     'position',
     'lga',
     'ward',
     'lcda',
+    'lcdaWard',
 ])
         ->findOrFail($nomination);
 

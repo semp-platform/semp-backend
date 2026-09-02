@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use App\Models\Candidate\CandidateDocumentReviewRequest;
 use App\Models\ElectionResult;
+use App\Models\Reference\LcdaWard;
 
 
 class Nomination extends Model
@@ -70,6 +71,7 @@ public const DEPARTMENT_LEGAL = 'legal';
     'lga_id',
     'lcda_id',
     'ward_id',
+    'lcda_ward_id',
     'status',
     'workflow_status',
     'current_department',
@@ -130,6 +132,11 @@ public const DEPARTMENT_LEGAL = 'legal';
     {
         return $this->belongsTo(Lcda::class);
     }
+
+    public function lcdaWard(): BelongsTo
+{
+    return $this->belongsTo(LcdaWard::class, 'lcda_ward_id');
+}
 
     public function withdrawal(): HasOne
     {

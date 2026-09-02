@@ -386,36 +386,75 @@
 
 
         <div>
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Local Government Area
-            </p>
+    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        Local Government Area
+    </p>
 
-            <p class="mt-2 text-sm font-medium text-slate-900">
-                {{ $nomination->lga?->name ?? 'Not applicable' }}
-            </p>
-        </div>
+    <p class="mt-2 text-sm font-medium text-slate-900">
+        {{ $nomination->lga?->name ?? 'Not applicable' }}
+    </p>
+</div>
 
+@if ($nomination->lcda)
 
-        <div>
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Ward
-            </p>
+    <div>
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            LCDA
+        </p>
 
-            <p class="mt-2 text-sm font-medium text-slate-900">
-                {{ $nomination->ward?->name ?? 'Not applicable' }}
-            </p>
-        </div>
+        <p class="mt-2 text-sm font-medium text-slate-900">
+            {{ $nomination->lcda->name }}
+        </p>
+    </div>
 
+@endif
 
-        <div>
-            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Election Date
-            </p>
+@if ($nomination->lcdaWard)
 
-            <p class="mt-2 text-sm font-medium text-slate-900">
-                {{ $nomination->election->election_date->format('d M Y') }}
-            </p>
-        </div>
+    <div>
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            LCDA Ward
+        </p>
+
+        <p class="mt-2 text-sm font-medium text-slate-900">
+            {{ $nomination->lcdaWard->name }}
+        </p>
+    </div>
+
+@elseif ($nomination->ward)
+
+    <div>
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Ward
+        </p>
+
+        <p class="mt-2 text-sm font-medium text-slate-900">
+            {{ $nomination->ward->name }}
+        </p>
+    </div>
+
+@else
+
+    <div>
+        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            Ward
+        </p>
+
+        <p class="mt-2 text-sm font-medium text-slate-900">
+            Not applicable
+        </p>
+    </div>
+
+@endif
+<div>
+    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+        Election Date
+    </p>
+
+    <p class="mt-2 text-sm font-medium text-slate-900">
+        {{ $nomination->election->election_date->format('d M Y') }}
+    </p>
+</div>
 
     </div>
 

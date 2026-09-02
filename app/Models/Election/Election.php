@@ -10,7 +10,7 @@ use App\Models\Reference\Lga;
 use App\Models\Reference\Ward;
 use App\Models\Reference\Lcda;
 use App\Models\ElectionResult;
-
+use App\Models\Reference\LcdaWard;
 use App\Models\Nomination\Nomination;
 
 
@@ -31,8 +31,9 @@ class Election extends Model
     'status',
     'is_active',
     'lga_id',
-    'ward_id',
-    'lcda_id',
+'ward_id',
+'lcda_id',
+'lcda_ward_id',
 ];
 
     protected $casts = [
@@ -72,6 +73,10 @@ public function ward(): BelongsTo
 public function lcda(): BelongsTo
 {
     return $this->belongsTo(Lcda::class);
+}
+public function lcdaWard(): BelongsTo
+{
+    return $this->belongsTo(LcdaWard::class);
 }
 public function nominations(): HasMany
 {

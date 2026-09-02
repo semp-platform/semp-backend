@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use App\Models\Nomination\NominationBatch;
 use App\Services\Nomination\NominationBatchService;
+use App\Models\Reference\Lcda;
 
 class NominationService
 {
@@ -85,7 +86,7 @@ class NominationService
                 'lga_id'             => $location['lga_id'],
                 'ward_id'            => $location['ward_id'],
                 'lcda_id'            => $location['lcda_id'],
-
+                'lcda_ward_id'       => $location['lcda_ward_id'],
                 'status'             => 'draft',
 
             ])->load([
@@ -130,6 +131,7 @@ class NominationService
                 'lga',
                 'ward',
                 'lcda',
+                 'lcdaWard',
             ])
             ->findOrFail($id);
     }
@@ -227,7 +229,7 @@ $nomination->candidate()->update([
             'ward_id' => $location['ward_id'],
 
             'lcda_id' => $location['lcda_id'],
-
+'lcda_ward_id' => $location['lcda_ward_id'],
         ]);
 
         return $nomination->fresh([
@@ -433,14 +435,24 @@ private function resolveLocation(
      * If the election already has a location configured,
      * use it. Otherwise, use the submitted values.
      */
-    $lgaId  = $election->lga_id  ?? ($data['lga_id']  ?? null);
+    $lgaId = $election->lga_id ?? ($data['lga_id'] ?? null);
     $wardId = $election->ward_id ?? ($data['ward_id'] ?? null);
     $lcdaId = $election->lcda_id ?? ($data['lcda_id'] ?? null);
+    $lcdaWardId = $election->lcda_ward_id ?? ($data['lcda_ward_id'] ?? null);
 
     switch ($position->code) {
 
         /*
-         * Chairmanship / Vice Chairmanship
+         * --------------------------------------------------------------
+         * LGA Chairmanship / LGA Vice Chairmanship
+         * --------------------------------------------------------------
+         *
+         * Location:
+         *     LGA
+         *
+         * No Ward.
+         * No LCDA.
+         * No LCDA Ward.
          */
         case 'CHAIR':
         case 'VICE':
@@ -464,15 +476,24 @@ private function resolveLocation(
                 ]);
             }
 
-            /*
-             * Chairmanship never stores a ward.
-             */
             $wardId = null;
+            $lcdaId = null;
+            $lcdaWardId = null;
 
             break;
 
+
         /*
-         * Councillorship
+         * --------------------------------------------------------------
+         * LGA Councillorship
+         * --------------------------------------------------------------
+         *
+         * Normal LGA Councillorship:
+         *
+         *     LGA + Ward
+         *
+         * Existing LCDA Election / LCDA Bye Election behaviour
+         * remains unchanged below.
          */
         case 'COUNC':
 
@@ -480,13 +501,6 @@ private function resolveLocation(
                 throw ValidationException::withMessages([
                     'lga_id' =>
                         'An LGA is required for Councillorship.',
-                ]);
-            }
-
-            if (! $wardId) {
-                throw ValidationException::withMessages([
-                    'ward_id' =>
-                        'A Ward is required for Councillorship.',
                 ]);
             }
 
@@ -503,20 +517,225 @@ private function resolveLocation(
                 ]);
             }
 
-            $ward = Ward::query()
-                ->where('id', $wardId)
+            /*
+             * LCDA elections use an LCDA Ward.
+             */
+            if (in_array(
+                $election->electionType?->name,
+                ['LCDA Election', 'LCDA Bye Election'],
+                true
+            )) {
+
+                if (! $lcdaId) {
+                    throw ValidationException::withMessages([
+                        'lcda_id' =>
+                            'An LCDA is required for Councillorship.',
+                    ]);
+                }
+
+                if (! $lcdaWardId) {
+                    throw ValidationException::withMessages([
+                        'lcda_ward_id' =>
+                            'An LCDA Ward is required for Councillorship.',
+                    ]);
+                }
+
+                $lcda = Lcda::query()
+                    ->where('id', $lcdaId)
+                    ->where('lga_id', $lga->id)
+                    ->where('is_active', true)
+                    ->first();
+
+                if (! $lcda) {
+                    throw ValidationException::withMessages([
+                        'lcda_id' =>
+                            'The selected LCDA does not belong to the selected LGA.',
+                    ]);
+                }
+
+                $lcdaWard = \App\Models\Reference\LcdaWard::query()
+                    ->where('id', $lcdaWardId)
+                    ->where('lcda_id', $lcda->id)
+                    ->where('is_active', true)
+                    ->first();
+
+                if (! $lcdaWard) {
+                    throw ValidationException::withMessages([
+                        'lcda_ward_id' =>
+                            'The selected LCDA Ward does not belong to the selected LCDA.',
+                    ]);
+                }
+
+                $wardId = null;
+
+            } else {
+
+                /*
+                 * Normal LGA Councillorship uses a Ward.
+                 */
+                if (! $wardId) {
+                    throw ValidationException::withMessages([
+                        'ward_id' =>
+                            'A Ward is required for Councillorship.',
+                    ]);
+                }
+
+                $ward = Ward::query()
+                    ->where('id', $wardId)
+                    ->where('lga_id', $lga->id)
+                    ->where('is_active', true)
+                    ->first();
+
+                if (! $ward) {
+                    throw ValidationException::withMessages([
+                        'ward_id' =>
+                            'The selected Ward does not belong to the selected LGA.',
+                    ]);
+                }
+
+                $lcdaId = null;
+                $lcdaWardId = null;
+            }
+
+            break;
+
+
+        /*
+         * --------------------------------------------------------------
+         * LCDA Chairmanship / LCDA Vice Chairmanship
+         * --------------------------------------------------------------
+         *
+         * Location:
+         *
+         *     LGA + LCDA
+         *
+         * No Ward.
+         * No LCDA Ward.
+         */
+        case 'LCDA_CHAIR':
+        case 'LCDA_VICE':
+
+            if (! $lgaId) {
+                throw ValidationException::withMessages([
+                    'lga_id' =>
+                        'An LGA is required for LCDA Chairmanship or Vice Chairmanship.',
+                ]);
+            }
+
+            $lga = Lga::query()
+                ->where('id', $lgaId)
+                ->where('state_id', $election->state_id)
+                ->where('is_active', true)
+                ->first();
+
+            if (! $lga) {
+                throw ValidationException::withMessages([
+                    'lga_id' =>
+                        'The selected LGA does not belong to the election state.',
+                ]);
+            }
+
+            if (! $lcdaId) {
+                throw ValidationException::withMessages([
+                    'lcda_id' =>
+                        'An LCDA is required.',
+                ]);
+            }
+
+            $lcda = Lcda::query()
+                ->where('id', $lcdaId)
                 ->where('lga_id', $lga->id)
                 ->where('is_active', true)
                 ->first();
 
-            if (! $ward) {
+            if (! $lcda) {
                 throw ValidationException::withMessages([
-                    'ward_id' =>
-                        'The selected Ward does not belong to the selected LGA.',
+                    'lcda_id' =>
+                        'The selected LCDA does not belong to the selected LGA.',
                 ]);
             }
 
+            $wardId = null;
+            $lcdaWardId = null;
+
             break;
+
+
+        /*
+         * --------------------------------------------------------------
+         * LCDA Councillorship
+         * --------------------------------------------------------------
+         *
+         * Location:
+         *
+         *     LGA + LCDA + LCDA Ward
+         */
+        case 'LCDA_COUNC':
+
+            if (! $lgaId) {
+                throw ValidationException::withMessages([
+                    'lga_id' =>
+                        'An LGA is required for LCDA Councillorship.',
+                ]);
+            }
+
+            $lga = Lga::query()
+                ->where('id', $lgaId)
+                ->where('state_id', $election->state_id)
+                ->where('is_active', true)
+                ->first();
+
+            if (! $lga) {
+                throw ValidationException::withMessages([
+                    'lga_id' =>
+                        'The selected LGA does not belong to the election state.',
+                ]);
+            }
+
+            if (! $lcdaId) {
+                throw ValidationException::withMessages([
+                    'lcda_id' =>
+                        'An LCDA is required for LCDA Councillorship.',
+                ]);
+            }
+
+            $lcda = Lcda::query()
+                ->where('id', $lcdaId)
+                ->where('lga_id', $lga->id)
+                ->where('is_active', true)
+                ->first();
+
+            if (! $lcda) {
+                throw ValidationException::withMessages([
+                    'lcda_id' =>
+                        'The selected LCDA does not belong to the selected LGA.',
+                ]);
+            }
+
+            if (! $lcdaWardId) {
+                throw ValidationException::withMessages([
+                    'lcda_ward_id' =>
+                        'An LCDA Ward is required for LCDA Councillorship.',
+                ]);
+            }
+
+            $lcdaWard = \App\Models\Reference\LcdaWard::query()
+                ->where('id', $lcdaWardId)
+                ->where('lcda_id', $lcda->id)
+                ->where('is_active', true)
+                ->first();
+
+            if (! $lcdaWard) {
+                throw ValidationException::withMessages([
+                    'lcda_ward_id' =>
+                        'The selected LCDA Ward does not belong to the selected LCDA.',
+                ]);
+            }
+
+            $wardId = null;
+
+            break;
+
 
         default:
 
@@ -526,11 +745,10 @@ private function resolveLocation(
     }
 
     return [
-
-        'lga_id'  => $lgaId,
+        'lga_id' => $lgaId,
         'ward_id' => $wardId,
         'lcda_id' => $lcdaId,
-
+        'lcda_ward_id' => $lcdaWardId,
     ];
 }
 

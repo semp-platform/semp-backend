@@ -85,6 +85,12 @@ class UpdatePartyNominationRequest extends FormRequest
                 Rule::exists('lcdas', 'id')
                     ->where('is_active', true),
             ],
+            'lcda_ward_id' => [
+    'nullable',
+    'integer',
+    Rule::exists('lcda_wards', 'id')
+        ->where('is_active', true),
+],
         ];
     }
 }

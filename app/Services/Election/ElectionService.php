@@ -22,6 +22,7 @@ class ElectionService
 'lga_id'                  => $data['lga_id'] ?? null,
 'ward_id'                 => $data['ward_id'] ?? null,
 'lcda_id'                 => $data['lcda_id'] ?? null,
+'lcda_ward_id'     => $data['lcda_ward_id'] ?? null,
 'name'                    => $data['name'],
     'election_date'          => $data['election_date'],
 
@@ -35,15 +36,21 @@ class ElectionService
     'is_active'              => true,
 ]);
 
-            $vicePositionId = Position::query()
-                ->where('code', 'VICE')
-                ->value('id');
+            $freePositionIds = Position::query()
+    ->whereIn('code', ['VICE', 'LCDA_VICE'])
+    ->pluck('id')
+    ->map(fn ($id) => (int) $id)
+    ->all();
 
-            foreach ($positions as $position) {
+foreach ($positions as $position) {
 
-                $fee = (int) $position['position_id'] === (int) $vicePositionId
-                    ? 0
-                    : $position['nomination_fee'];
+    $fee = in_array(
+        (int) $position['position_id'],
+        $freePositionIds,
+        true
+    )
+        ? 0
+        : $position['nomination_fee'];
 
                 $election->electionPositions()->create([
                     'position_id' => $position['position_id'],
@@ -58,6 +65,7 @@ class ElectionService
 'lga',
 'ward',
 'lcda',
+'lcdaWard',
 'electionPositions.position',
             ]);
         });
@@ -72,6 +80,7 @@ class ElectionService
 'lga',
 'ward',
 'lcda',
+'lcdaWard',
 'electionPositions.position',
         ])
         ->orderByDesc('election_date')
@@ -87,6 +96,7 @@ public function getById(int $id): Election
 'lga',
 'ward',
 'lcda',
+'lcdaWard',
 'electionPositions.position',
         ])
         ->findOrFail($id);
@@ -109,6 +119,7 @@ public function update(int $id, array $data): Election
 'lga_id'                  => $data['lga_id'] ?? null,
 'ward_id'                 => $data['ward_id'] ?? null,
 'lcda_id'                 => $data['lcda_id'] ?? null,
+'lcda_ward_id'     => $data['lcda_ward_id'] ?? null,
 'name'                    => $data['name'],
     'election_date'           => $data['election_date'],
 
@@ -121,19 +132,25 @@ public function update(int $id, array $data): Election
 
 ]);
 
-        $vicePositionId = Position::query()
-            ->where('code', 'VICE')
-            ->value('id');
+        $freePositionIds = Position::query()
+    ->whereIn('code', ['VICE', 'LCDA_VICE'])
+    ->pluck('id')
+    ->map(fn ($id) => (int) $id)
+    ->all();
 
-        // Remove existing election positions
-        $election->electionPositions()->delete();
+// Remove existing election positions
+$election->electionPositions()->delete();
 
-        // Re-create the selected positions
-        foreach ($positions as $position) {
+// Re-create the selected positions
+foreach ($positions as $position) {
 
-            $fee = (int) $position['position_id'] === (int) $vicePositionId
-                ? 0
-                : $position['nomination_fee'];
+    $fee = in_array(
+        (int) $position['position_id'],
+        $freePositionIds,
+        true
+    )
+        ? 0
+        : $position['nomination_fee'];
 
             $election->electionPositions()->create([
                 'position_id'     => $position['position_id'],
@@ -148,6 +165,7 @@ public function update(int $id, array $data): Election
 'lga',
 'ward',
 'lcda',
+'lcdaWard',
 'electionPositions.position',
         ]);
     });

@@ -27,5 +27,9 @@ Route::prefix('locations')
             '/lgas/{lga}/lcdas',
             [LocationController::class, 'lcdas']
         )->name('lcdas');
+        Route::get(
+    '/lcdas/{lcda}/wards',
+    [LocationController::class, 'lcdaWards']
+)->name('lcda.wards');
 
     });

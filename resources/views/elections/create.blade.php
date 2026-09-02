@@ -221,6 +221,25 @@
 
         </div>
 
+        {{-- LCDA Ward --}}
+<div id="lcda-ward-container" class="hidden">
+
+    <label
+        for="lcda_ward_id"
+        class="mb-2 block text-sm font-medium text-slate-700"
+    >
+        LCDA Ward
+    </label>
+
+    <select
+        id="lcda_ward_id"
+        name="lcda_ward_id"
+        class="w-full rounded-lg border border-slate-300 px-4 py-3"
+    >
+        <option value="">Select LCDA Ward</option>
+    </select>
+
+</div>
 
         {{-- LCDA --}}
         <div id="lcda-container" class="hidden">
@@ -329,101 +348,95 @@
 </div>
 
     {{-- Positions --}}
-    <div class="rounded-xl border border-slate-200 bg-white shadow-sm">
+<div class="rounded-xl border border-slate-200 bg-white shadow-sm">
 
-        <div class="border-b border-slate-200 px-6 py-5">
-            <h2 class="font-semibold text-slate-950">
-                Positions & Nomination Fees
-            </h2>
+    <div class="border-b border-slate-200 px-6 py-5">
+        <h2 class="font-semibold text-slate-950">
+            Positions & Nomination Fees
+        </h2>
 
-            <p class="mt-1 text-sm text-slate-500">
-                Select the positions that will be contested and configure their nomination fees.
-            </p>
-        </div>
+        <p class="mt-1 text-sm text-slate-500">
+            Select the positions that will be contested and configure their nomination fees.
+        </p>
+    </div>
 
+    <div class="divide-y divide-slate-100">
 
-        <div class="divide-y divide-slate-100">
+        @foreach ($positions as $position)
 
-            @foreach ($positions as $position)
+            @php
+                $index = $loop->index;
 
-    @php
-        $selected = old("positions.{$position->id}.position_id") == $position->id;
-    @endphp
+                $selected = old("positions.{$index}.position_id") == $position->id;
+            @endphp
 
-    <div class="grid gap-4 px-6 py-5 md:grid-cols-[1fr_220px] md:items-center">
+            <div class="grid gap-4 px-6 py-5 md:grid-cols-[1fr_220px] md:items-center">
 
-        <div class="flex items-start gap-3">
+                <div class="flex items-start gap-3">
 
-            <input
-                id="position-{{ $position->id }}"
-                type="checkbox"
-                name="positions[{{ $position->id }}][position_id]"
-                value="{{ $position->id }}"
-                @checked($selected)
-                onchange="
-                    document.getElementById('fee-{{ $position->id }}').disabled = !this.checked;
-                "
-                class="mt-1 h-4 w-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-600"
-            >
+                    <input
+                        id="position-{{ $position->id }}"
+                        type="checkbox"
+                        name="positions[{{ $index }}][position_id]"
+                        value="{{ $position->id }}"
+                        @checked($selected)
+                        onchange="
+                            document.getElementById('fee-{{ $position->id }}').disabled = !this.checked;
+                        "
+                        class="mt-1 h-4 w-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-600"
+                    >
 
-            <label
-                for="position-{{ $position->id }}"
-                class="cursor-pointer"
-            >
-                <span class="block text-sm font-semibold text-slate-900">
-                    {{ $position->name }}
-                </span>
+                    <label
+                        for="position-{{ $position->id }}"
+                        class="cursor-pointer"
+                    >
+                        <span class="block text-sm font-semibold text-slate-900">
+                            {{ $position->name }}
+                        </span>
 
-                <span class="mt-1 block text-xs text-slate-500">
-                    {{ $position->code }}
-                </span>
-            </label>
+                        <span class="mt-1 block text-xs text-slate-500">
+                            {{ $position->code }}
+                        </span>
+                    </label>
 
-        </div>
+                </div>
 
+                <div>
 
-        <div>
+                    <label
+                        for="fee-{{ $position->id }}"
+                        class="mb-1 block text-xs font-medium text-slate-500"
+                    >
+                        Nomination Fee (₦)
+                    </label>
 
-            <label
-                for="fee-{{ $position->id }}"
-                class="mb-1 block text-xs font-medium text-slate-500"
-            >
-                Nomination Fee (₦)
-            </label>
+                    <input
+                        id="fee-{{ $position->id }}"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        name="positions[{{ $index }}][nomination_fee]"
+                        value="{{ old(
+                            "positions.{$index}.nomination_fee",
+                            in_array($position->code, ['VICE', 'LCDA_VICE'], true) ? '0' : ''
+                        ) }}"
+                        @disabled(!$selected)
+                        @if (in_array($position->code, ['VICE', 'LCDA_VICE'], true))
+                            readonly
+                        @endif
+                        placeholder="0.00"
+                        class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none transition disabled:bg-slate-100 disabled:text-slate-400 focus:border-emerald-700 focus:ring-4 focus:ring-emerald-700/10"
+                    >
 
-            <input
-                id="fee-{{ $position->id }}"
-                type="number"
-                min="0"
-                step="0.01"
-                name="positions[{{ $position->id }}][nomination_fee]"
+                </div>
 
-                value="{{ old(
-                    "positions.{$position->id}.nomination_fee",
-                    $position->code === 'VICE' ? '0' : ''
-                ) }}"
+            </div>
 
-                @disabled(!$selected)
-
-                @if ($position->code === 'VICE')
-                    readonly
-                @endif
-
-                placeholder="0.00"
-
-                class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none transition disabled:bg-slate-100 disabled:text-slate-400 focus:border-emerald-700 focus:ring-4 focus:ring-emerald-700/10"
-            >
-
-        </div>
+        @endforeach
 
     </div>
 
-@endforeach
-
-        </div>
-
-    </div>
-
+</div>
 
     <div class="flex items-center justify-end gap-3">
 

@@ -32,6 +32,24 @@ class PositionSeeder extends Seeder
                 'display_order' => 3,
             ],
 
+            [
+                'name' => 'LCDA Chairmanship',
+                'code' => 'LCDA_CHAIR',
+                'display_order' => 4,
+            ],
+
+            [
+                'name' => 'LCDA Vice Chairmanship',
+                'code' => 'LCDA_VICE',
+                'display_order' => 5,
+            ],
+
+            [
+                'name' => 'LCDA Councillorship',
+                'code' => 'LCDA_COUNC',
+                'display_order' => 6,
+            ],
+
         ];
 
         foreach ($positions as $position) {
