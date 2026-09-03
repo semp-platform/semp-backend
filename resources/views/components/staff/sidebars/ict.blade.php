@@ -62,7 +62,17 @@
 >
     Publication & Release
 </a>
+{{-- Election Notices --}}
+<div class="px-2 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
+    Communications
+</div>
 
+<a
+    href="{{ route('staff.ict.election-notices.index') }}"
+    class="block rounded-lg px-4 py-3 text-sm text-white hover:bg-slate-800"
+>
+    Election Notices
+</a>
 {{-- Results --}}
 <div class="px-2 pb-2 pt-6 text-xs font-semibold uppercase tracking-wider text-slate-500">
     Results

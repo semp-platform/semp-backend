@@ -86,6 +86,7 @@ class RolesAndPermissionsSeeder extends Seeder
 
 // Election Results
 'results.manage',
+'election-notices.manage',
 
             // Department-specific nomination permissions
             'legal.view',
@@ -233,6 +234,7 @@ class RolesAndPermissionsSeeder extends Seeder
     'parties.view',
 
     'results.manage',
+    'election-notices.manage',
 ]);
 
         /*

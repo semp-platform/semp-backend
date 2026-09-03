@@ -12,6 +12,7 @@ use App\Models\Reference\Lcda;
 use App\Models\ElectionResult;
 use App\Models\Reference\LcdaWard;
 use App\Models\Nomination\Nomination;
+use App\Models\Communication\ElectionNotice;
 
 
 class Election extends Model
@@ -85,5 +86,9 @@ public function nominations(): HasMany
 public function results(): HasMany
 {
     return $this->hasMany(ElectionResult::class);
+}
+public function notices(): HasMany
+{
+    return $this->hasMany(ElectionNotice::class);
 }
 }

@@ -4,6 +4,7 @@ use App\Http\Controllers\Web\Nomination\IctNominationController;
 use App\Http\Controllers\Web\Party\CandidateDocumentController;
 use App\Http\Controllers\Web\Results\IctResultController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Web\Communication\IctElectionNoticeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -159,4 +160,31 @@ Route::prefix('ict')
         )
             ->middleware('permission:results.manage')
             ->name('results.ward');
+
+            /*
+|--------------------------------------------------------------------------
+| Election Notices
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/election-notices',
+    [IctElectionNoticeController::class, 'index']
+)
+    ->middleware('permission:election-notices.manage')
+    ->name('election-notices.index');
+
+Route::get(
+    '/election-notices/create',
+    [IctElectionNoticeController::class, 'create']
+)
+    ->middleware('permission:election-notices.manage')
+    ->name('election-notices.create');
+
+Route::post(
+    '/election-notices',
+    [IctElectionNoticeController::class, 'store']
+)
+    ->middleware('permission:election-notices.manage')
+    ->name('election-notices.store');
     });
