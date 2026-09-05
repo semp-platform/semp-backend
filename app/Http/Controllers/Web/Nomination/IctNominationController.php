@@ -17,6 +17,42 @@ class IctNominationController extends Controller
     ) {
     }
 
+public function dashboard(): View
+{
+    $pendingBatches = NominationBatch::query()
+        ->whereIn('status', [
+            NominationBatch::STATUS_SUBMITTED,
+            NominationBatch::STATUS_UNDER_REVIEW,
+        ])
+        ->count();
+
+    $nominationsUnderReview = Nomination::query()
+        ->where('current_department', Nomination::DEPARTMENT_ICT)
+        ->where(
+            'workflow_status',
+            Nomination::WORKFLOW_STATUS_UNDER_REVIEW
+        )
+        ->whereNotIn('status', [
+            Nomination::STATUS_WITHDRAWN,
+            Nomination::STATUS_REPLACED,
+        ])
+        ->count();
+
+    $totalNominations = Nomination::query()
+        ->count();
+
+$publishedResults = \App\Models\ResultImport::query()
+   ->where('status', 'published')
+        ->count();
+
+    return view('staff.ict.dashboard', [
+        'pendingBatches' => $pendingBatches,
+        'nominationsUnderReview' => $nominationsUnderReview,
+        'totalNominations' => $totalNominations,
+        'publishedResults' => $publishedResults,
+    ]);
+}
+
     /**
      * Display nomination batches submitted by political parties
      * and batches currently under ICT review.

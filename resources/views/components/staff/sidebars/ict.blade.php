@@ -14,7 +14,7 @@
 <nav class="flex-1 space-y-1 overflow-y-auto px-4 py-6">
 
     <a
-        href="#"
+        href="{{ route('staff.ict.dashboard') }}"
         class="block rounded-lg px-4 py-3 text-sm font-medium text-white hover:bg-slate-800"
     >
         Dashboard

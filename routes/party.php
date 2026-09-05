@@ -10,6 +10,14 @@ use App\Http\Controllers\Web\Party\NominationBatchController;
 use App\Http\Controllers\Web\Party\ReturnedNominationController;
 use App\Models\Nomination\Nomination;
 use App\Http\Controllers\Web\Party\PartyPrimaryNoticeController;
+use App\Http\Controllers\Web\Party\ElectionNoticeController;
+use App\Http\Controllers\Web\Party\InboxController;
+
+
+
+
+
+
 /*
 |--------------------------------------------------------------------------
 | Political Party Portal
@@ -20,6 +28,18 @@ Route::prefix('party')
     ->name('party.')
     ->middleware('role:Political Party Officer')
     ->group(function () {
+        /*
+|--------------------------------------------------------------------------
+| Inbox
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/inbox',
+    [InboxController::class, 'index']
+)
+    ->name('inbox.index');
+
 
         /*
         |--------------------------------------------------------------------------
@@ -364,6 +384,16 @@ Route::prefix('replacements')
 
     });
 
+    Route::get(
+    '/election-notices',
+    [ElectionNoticeController::class, 'index']
+)->name('election-notices.index');
+
+Route::get(
+    '/election-notices/{electionNotice}',
+    [ElectionNoticeController::class, 'show']
+)->name('election-notices.show');
+
             /*
 |--------------------------------------------------------------------------
 | Returned Nominations
@@ -377,3 +407,4 @@ Route::get(
 ->middleware('permission:party-nominations.view')
 ->name('returned-nominations.index');
     });
+

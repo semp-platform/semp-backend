@@ -1,4 +1,4 @@
-@'
+
 @extends('layouts.party')
 
 @section('title', 'Replace Candidate | SEMP')
@@ -557,4 +557,4 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 
 @endsection
-'@ | Set-Content resources\views\party\replacements\create.blade.php
+

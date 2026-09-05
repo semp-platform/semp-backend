@@ -70,7 +70,7 @@ class NominationService
             $this->ensureCandidateNotAlreadyNominated(
                 $election,
                 $candidate->id,
-                $position
+
             );
 
             /*
@@ -209,7 +209,6 @@ class NominationService
         $this->ensureCandidateNotAlreadyNominated(
             $election,
             $nomination->candidate_id,
-            $position,
             $nomination
         );
 $nomination->candidate()->update([
@@ -755,27 +754,21 @@ private function resolveLocation(
 private function ensureCandidateNotAlreadyNominated(
     Election $election,
     int $candidateId,
-    Position $position,
     ?Nomination $ignore = null
 ): void {
-
     $query = Nomination::query()
         ->where('election_id', $election->id)
-        ->where('candidate_id', $candidateId)
-        ->where('position_id', $position->id);
+        ->where('candidate_id', $candidateId);
 
     if ($ignore) {
         $query->whereKeyNot($ignore->id);
     }
 
     if ($query->exists()) {
-
         throw ValidationException::withMessages([
-            'position_id' =>
-                'This candidate has already been nominated for this position in this election.',
+            'nin' =>
+                'This candidate has already been nominated for this election and cannot be nominated for another position in the same election.',
         ]);
-
     }
 }
-
 }

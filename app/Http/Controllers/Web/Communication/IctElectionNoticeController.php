@@ -71,4 +71,18 @@ class IctElectionNoticeController extends Controller
             ->route('staff.ict.election-notices.index')
             ->with('success', 'Election notice saved as draft.');
     }
+
+    public function publish(
+        Request $request,
+        ElectionNotice $electionNotice
+    ): RedirectResponse {
+        $electionNotice->update([
+            'status' => 'published',
+            'published_at' => now(),
+        ]);
+
+        return redirect()
+            ->route('staff.ict.election-notices.index')
+            ->with('success', 'Election notice published successfully.');
+    }
 }

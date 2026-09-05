@@ -64,11 +64,20 @@
 
         </svg>
 
-        <span
-            class="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white"
-        >
-            0
-        </span>
+        @php
+    $notificationCount = \App\Models\Communication\ElectionNotice::query()
+        ->where('status', 'published')
+        ->whereNull('read_at')
+        ->count();
+@endphp
+
+@if ($notificationCount > 0)
+    <span
+        class="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white"
+    >
+        {{ $notificationCount > 99 ? '99+' : $notificationCount }}
+    </span>
+@endif
 
     </button>
 

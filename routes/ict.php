@@ -16,6 +16,12 @@ Route::prefix('ict')
     ->name('staff.ict.')
     ->group(function () {
 
+    Route::get(
+    '/dashboard',
+    [IctNominationController::class, 'dashboard']
+)
+    ->name('dashboard');
+
         /*
         |--------------------------------------------------------------------------
         | Incoming Nomination Batches
@@ -187,4 +193,13 @@ Route::post(
 )
     ->middleware('permission:election-notices.manage')
     ->name('election-notices.store');
+
+    Route::post(
+    '/election-notices/{electionNotice}/publish',
+    [IctElectionNoticeController::class, 'publish']
+)
+    ->middleware('permission:election-notices.manage')
+    ->name('election-notices.publish');
+
+
     });

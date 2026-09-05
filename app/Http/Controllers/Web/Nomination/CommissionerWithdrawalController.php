@@ -4,15 +4,20 @@ namespace App\Http\Controllers\Web\Nomination;
 
 use App\Http\Controllers\Controller;
 use App\Models\Candidate\CandidateWithdrawal;
+use App\Services\Candidate\CandidateWithdrawalService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class CommissionerWithdrawalController extends Controller
 {
+    public function __construct(
+        protected CandidateWithdrawalService $withdrawalService
+    ) {
+    }
+
     /**
-     * Display candidate withdrawal history.
-     *
-     * This page is read-only. Actual approve/reject decisions
-     * are handled from the separate "Awaiting Decision" workflow.
+     * Display candidate withdrawal requests.
      */
     public function index(): View
     {
@@ -44,10 +49,6 @@ class CommissionerWithdrawalController extends Controller
 
     /**
      * Display withdrawal details.
-     *
-     * This page is read-only.
-     * The actual Commissioner decision is handled
-     * by the separate "Awaiting Decision" workflow.
      */
     public function show(
         CandidateWithdrawal $withdrawal
@@ -69,5 +70,68 @@ class CommissionerWithdrawalController extends Controller
                 'withdrawal' => $withdrawal,
             ]
         );
+    }
+
+    /**
+     * Approve a candidate withdrawal request.
+     */
+    public function approve(
+        Request $request,
+        CandidateWithdrawal $withdrawal
+    ): RedirectResponse {
+        $validated = $request->validate([
+            'comment' => [
+                'nullable',
+                'string',
+                'max:2000',
+            ],
+        ]);
+
+        $this->withdrawalService->approve(
+            $withdrawal,
+            $request->user()->id
+        );
+
+        return redirect()
+            ->route(
+                'staff.commissioner.withdrawals.show',
+                $withdrawal
+            )
+            ->with(
+                'success',
+                'Candidate withdrawal request approved successfully.'
+            );
+    }
+
+    /**
+     * Reject a candidate withdrawal request.
+     */
+    public function reject(
+        Request $request,
+        CandidateWithdrawal $withdrawal
+    ): RedirectResponse {
+        $validated = $request->validate([
+            'comment' => [
+                'nullable',
+                'string',
+                'max:2000',
+            ],
+        ]);
+
+        $this->withdrawalService->reject(
+            $withdrawal,
+            $request->user()->id,
+            $validated['comment'] ?? null
+        );
+
+        return redirect()
+            ->route(
+                'staff.commissioner.withdrawals.show',
+                $withdrawal
+            )
+            ->with(
+                'success',
+                'Candidate withdrawal request denied.'
+            );
     }
 }

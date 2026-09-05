@@ -23,6 +23,7 @@ class ElectionNotice extends Model
 
     protected $casts = [
         'published_at' => 'datetime',
+        'read_at' => 'datetime',
     ];
 
     public function election(): BelongsTo
